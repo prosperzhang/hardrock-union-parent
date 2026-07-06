@@ -7,7 +7,7 @@
 The platform already has three app identities:
 
 - `WSGM`
-- `PMHUB`
+- `NEXIS`
 - `PRIMELOAD-MARKETPLACE`
 
 Each app needs its own:
@@ -64,7 +64,7 @@ Recommended fields:
 Suggested field meaning:
 
 - `app_code`
-  app registry code, such as `WSGM`, `PMHUB`, `PRIMELOAD-MARKETPLACE`
+  app registry code, such as `WSGM`, `NEXIS`, `PRIMELOAD-MARKETPLACE`
 - `tenant_code`
   tenant code unique inside one app
 - `tenant_name`
@@ -142,8 +142,8 @@ Recommended tenant seeds:
 
 - `WSGM`
   - `wsgm-hq`
-- `PMHUB`
-  - `pmhub-default`
+- `NEXIS`
+  - `nexis-default`
 - `PRIMELOAD-MARKETPLACE`
   - `primeload-marketplace-default`
 

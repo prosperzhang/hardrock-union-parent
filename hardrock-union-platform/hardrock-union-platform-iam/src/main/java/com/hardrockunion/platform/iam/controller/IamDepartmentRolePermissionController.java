@@ -36,7 +36,7 @@ public class IamDepartmentRolePermissionController {
 
     @Operation(summary = "查询部门角色权限", description = "返回指定部门角色当前已绑定的权限。只有 WSGM 登录态允许调用。")
     @GetMapping
-    public Result<List<IamPermissionResponse>> list(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<List<IamPermissionResponse>> list(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                     @PathVariable("appCode") String appCode,
                                                     @Parameter(description = "部门ID")
                                                     @PathVariable("departmentId") Long departmentId,
@@ -48,7 +48,7 @@ public class IamDepartmentRolePermissionController {
 
     @Operation(summary = "更新部门角色权限", description = "覆盖式更新部门角色绑定的权限集合。只有 WSGM 登录态允许调用。")
     @PutMapping
-    public Result<List<IamPermissionResponse>> assign(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<List<IamPermissionResponse>> assign(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                       @PathVariable("appCode") String appCode,
                                                       @Parameter(description = "部门ID")
                                                       @PathVariable("departmentId") Long departmentId,

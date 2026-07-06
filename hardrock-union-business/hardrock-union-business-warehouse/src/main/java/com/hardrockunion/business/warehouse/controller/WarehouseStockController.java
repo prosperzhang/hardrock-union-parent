@@ -32,7 +32,7 @@ public class WarehouseStockController {
 
     @Operation(summary = "查询仓库产品库存")
     @GetMapping
-    public Result<List<WarehouseStockResponse>> list(@Parameter(description = "应用编码，例如 PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<List<WarehouseStockResponse>> list(@Parameter(description = "应用编码，例如 NEXIS、PRIMELOAD-MARKETPLACE")
                                                      @PathVariable("appCode") String appCode,
                                                      @Parameter(description = "仓库ID")
                                                      @PathVariable("warehouseId") Long warehouseId,
@@ -42,7 +42,7 @@ public class WarehouseStockController {
 
     @Operation(summary = "放入产品库存", description = "把产品放入当前租户指定数字仓库；重复放入同一产品时累加数量。")
     @PostMapping
-    public Result<WarehouseStockResponse> putProduct(@Parameter(description = "应用编码，例如 PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<WarehouseStockResponse> putProduct(@Parameter(description = "应用编码，例如 NEXIS、PRIMELOAD-MARKETPLACE")
                                                      @PathVariable("appCode") String appCode,
                                                      @Parameter(description = "仓库ID")
                                                      @PathVariable("warehouseId") Long warehouseId,

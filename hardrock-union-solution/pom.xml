@@ -13,7 +13,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>hardrock-union-solution-wsgm</module>
-        <module>hardrock-union-solution-pmhub</module>
+        <module>hardrock-union-solution-nexis</module>
         <module>hardrock-union-solution-primeload-marketplace</module>
         <module>hardrock-union-solution-primeload-logistics</module>
         <module>hardrock-union-solution-primeload-cloud-warehouse</module>

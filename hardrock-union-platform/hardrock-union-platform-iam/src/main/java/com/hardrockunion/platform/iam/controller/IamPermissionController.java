@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "IAM-权限", description = "权限主数据。只有 WSGM 可以管理权限；PMHUB、PRIMELOAD-MARKETPLACE 通过角色继承权限，不直接创建权限。")
+@Tag(name = "IAM-权限", description = "权限主数据。只有 WSGM 可以管理权限；NEXIS、PRIMELOAD-MARKETPLACE 通过角色继承权限，不直接创建权限。")
 @RestController
 @RequestMapping("/api/{appCode}/permissions")
 public class IamPermissionController {
@@ -39,7 +39,7 @@ public class IamPermissionController {
 
     @Operation(summary = "查询权限列表", description = "返回当前 app 下的权限列表。只有 WSGM 登录态允许调用。")
     @GetMapping
-    public Result<List<IamPermissionResponse>> list(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<List<IamPermissionResponse>> list(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                     @PathVariable("appCode") String appCode,
                                                     LoginUser loginUser) {
         return Result.success(iamPermissionQueryService.listPermissions(appCode, loginUser));
@@ -47,7 +47,7 @@ public class IamPermissionController {
 
     @Operation(summary = "查询权限树", description = "返回当前 app 下的权限树。只有 WSGM 登录态允许调用。")
     @GetMapping("/tree")
-    public Result<List<IamPermissionResponse>> tree(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<List<IamPermissionResponse>> tree(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                     @PathVariable("appCode") String appCode,
                                                     LoginUser loginUser) {
         return Result.success(iamPermissionQueryService.listPermissionTree(appCode, loginUser));
@@ -55,7 +55,7 @@ public class IamPermissionController {
 
     @Operation(summary = "查询权限详情", description = "返回指定权限的完整定义。只有 WSGM 登录态允许调用。")
     @GetMapping("/{permissionId}")
-    public Result<IamPermissionResponse> detail(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<IamPermissionResponse> detail(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                 @PathVariable("appCode") String appCode,
                                                 @Parameter(description = "权限ID")
                                                 @PathVariable("permissionId") Long permissionId,
@@ -65,7 +65,7 @@ public class IamPermissionController {
 
     @Operation(summary = "创建权限", description = "为指定 app 创建一个权限。只有 WSGM 登录态允许调用。")
     @PostMapping
-    public Result<IamPermissionResponse> create(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<IamPermissionResponse> create(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                 @PathVariable("appCode") String appCode,
                                                 @RequestBody IamPermissionCreateRequest request,
                                                 LoginUser loginUser) {
@@ -74,7 +74,7 @@ public class IamPermissionController {
 
     @Operation(summary = "更新权限", description = "更新权限名称、类型、父级、路径、组件、状态与排序。只有 WSGM 登录态允许调用。")
     @PutMapping("/{permissionId}")
-    public Result<IamPermissionResponse> update(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<IamPermissionResponse> update(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                 @PathVariable("appCode") String appCode,
                                                 @Parameter(description = "权限ID")
                                                 @PathVariable("permissionId") Long permissionId,
@@ -85,7 +85,7 @@ public class IamPermissionController {
 
     @Operation(summary = "删除权限", description = "逻辑删除指定权限。若权限仍有子权限或已分配给角色，则不允许删除。")
     @DeleteMapping("/{permissionId}")
-    public Result<Void> delete(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<Void> delete(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                @PathVariable("appCode") String appCode,
                                @Parameter(description = "权限ID")
                                @PathVariable("permissionId") Long permissionId,

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS merchant_order (
     merchant_id BIGINT NOT NULL COMMENT '商户租户ID',
     merchant_name VARCHAR(128) NOT NULL COMMENT '商户名称',
     target_app_id BIGINT DEFAULT NULL COMMENT '目标应用ID',
-    target_app_code VARCHAR(32) NOT NULL DEFAULT 'PMHUB' COMMENT '目标应用编码',
+    target_app_code VARCHAR(32) NOT NULL DEFAULT 'NEXIS' COMMENT '目标应用编码',
     target_tenant_id BIGINT DEFAULT NULL COMMENT '目标租户ID',
     target_project_name VARCHAR(128) DEFAULT NULL COMMENT '目标项目名称',
     target_site_name VARCHAR(128) DEFAULT NULL COMMENT '目标工地名称',

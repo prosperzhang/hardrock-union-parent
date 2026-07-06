@@ -5,7 +5,7 @@ package com.hardrockunion.platform.iam.dto;
  */
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "共享角色创建请求。只有 WSGM 允许创建 WSGM、PMHUB、PRIMELOAD-MARKETPLACE 三端角色。")
+@Schema(description = "共享角色创建请求。只有 WSGM 允许创建 WSGM、NEXIS、PRIMELOAD-MARKETPLACE 三端角色。")
 public class IamRoleCreateRequest {
 
     @Schema(description = "角色编码，必须以目标 app 编码开头", example = "PRIMELOAD_MARKETPLACE_PROCUREMENT_CLERK")

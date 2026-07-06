@@ -23,7 +23,7 @@ public class MerchantOrderResponse {
     private String merchantName;
     // 目标应用 ID。
     private Long targetAppId;
-    // 目标应用，当前默认是 PMHUB。
+    // 目标应用，当前默认是 NEXIS。
     private String targetAppCode;
     // 目标租户。
     private Long targetTenantId;

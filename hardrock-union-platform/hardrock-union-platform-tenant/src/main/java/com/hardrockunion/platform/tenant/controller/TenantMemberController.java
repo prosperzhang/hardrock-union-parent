@@ -34,7 +34,7 @@ public class TenantMemberController {
 
     @Operation(summary = "查询租户空间成员列表", description = "返回指定租户空间下的成员、部门和角色信息。")
     @GetMapping
-    public Result<List<TenantMemberResponse>> list(@Parameter(description = "应用编码，例如 PMHUB")
+    public Result<List<TenantMemberResponse>> list(@Parameter(description = "应用编码，例如 NEXIS")
                                                    @PathVariable("appCode") String appCode,
                                                    @Parameter(description = "租户空间ID")
                                                    @PathVariable("tenantId") Long tenantId,
@@ -44,7 +44,7 @@ public class TenantMemberController {
 
     @Operation(summary = "分配成员部门和角色", description = "管理员先选部门，再从该部门可分配角色中选择角色，最终写入租户成员部门角色关系。")
     @PutMapping("/{memberId}/department-roles")
-    public Result<TenantMemberResponse> assignDepartmentRoles(@Parameter(description = "应用编码，例如 PMHUB")
+    public Result<TenantMemberResponse> assignDepartmentRoles(@Parameter(description = "应用编码，例如 NEXIS")
                                                               @PathVariable("appCode") String appCode,
                                                               @Parameter(description = "租户空间ID")
                                                               @PathVariable("tenantId") Long tenantId,
@@ -63,7 +63,7 @@ public class TenantMemberController {
 
     @Operation(summary = "移出租户空间成员", description = "把指定成员移出租户空间，并停用其部门角色绑定。")
     @PostMapping("/{memberId}/remove")
-    public Result<TenantMemberResponse> remove(@Parameter(description = "应用编码，例如 PMHUB")
+    public Result<TenantMemberResponse> remove(@Parameter(description = "应用编码，例如 NEXIS")
                                                @PathVariable("appCode") String appCode,
                                                @Parameter(description = "租户空间ID")
                                                @PathVariable("tenantId") Long tenantId,

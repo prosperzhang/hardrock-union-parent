@@ -12,17 +12,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * 商城报价单创建请求。
  *
- * <p>当前商户报价面向的是 `pmhub` 侧交易对象，因此这里的目标字段用于描述
+ * <p>当前商户报价面向的是 `nexis` 侧交易对象，因此这里的目标字段用于描述
  * “卖给哪个租户、哪个项目、哪个工地、哪个联系人”。
  */
 @Schema(name = "MerchantQuotationCreateRequest", description = "商城报价单创建请求")
 public class MerchantQuotationCreateRequest {
 
-    // 目标应用，当前默认是 PMHUB。
-    @Schema(description = "目标应用编码，当前默认对接 PMHUB", example = "PMHUB")
+    // 目标应用，当前默认是 NEXIS。
+    @Schema(description = "目标应用编码，当前默认对接 NEXIS", example = "NEXIS")
     private String targetAppCode;
-    // 目标租户，一般对应 pmhub 里的公司租户。
-    @Schema(description = "目标租户 ID，一般对应 pmhub 公司租户", example = "2001")
+    // 目标租户，一般对应 nexis 里的公司租户。
+    @Schema(description = "目标租户 ID，一般对应 nexis 公司租户", example = "2001")
     private Long targetTenantId;
     // 目标项目名称，现阶段先用文本承接，后面可逐步升级成真实引用。
     @Schema(description = "目标项目名称", example = "浦东新区学校改造项目")

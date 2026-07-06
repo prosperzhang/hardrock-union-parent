@@ -10,13 +10,13 @@ public class TenantMemberDepartmentRoleResponse {
     @Schema(description = "部门ID", example = "72217422662279197")
     private Long departmentId;
 
-    @Schema(description = "部门编码", example = "PMHUB_ENGINEERING_DEPT")
+    @Schema(description = "部门编码", example = "NEXIS_ENGINEERING_DEPT")
     private String departmentCode;
 
     @Schema(description = "部门名称", example = "工程部")
     private String departmentName;
 
-    @Schema(description = "角色编码列表", example = "[\"PMHUB_CONSTRUCTION_OFFICER\"]")
+    @Schema(description = "角色编码列表", example = "[\"NEXIS_CONSTRUCTION_OFFICER\"]")
     private List<String> roleCodes;
 
     public Long getDepartmentId() {

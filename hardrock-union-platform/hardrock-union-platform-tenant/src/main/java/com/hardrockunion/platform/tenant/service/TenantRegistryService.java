@@ -207,7 +207,7 @@ public class TenantRegistryService {
                                                       String districtName,
                                                       String managerName,
                                                       String managerPhone) {
-        return createTenant(appCode, "PROJECT", "PMHUB", tenantCode, tenantName, projectAddress,
+        return createTenant(appCode, "PROJECT", "NEXIS", tenantCode, tenantName, projectAddress,
             provinceCode, provinceName, cityCode, cityName, districtCode, districtName, managerName, managerPhone);
     }
 
@@ -478,7 +478,7 @@ public class TenantRegistryService {
     }
 
     private void ensureHierarchyColumns() {
-        addColumnIfMissing("parent_tenant_id", "ALTER TABLE tenant_registry ADD COLUMN parent_tenant_id BIGINT DEFAULT NULL COMMENT '父级租户ID。PMHUB 中项目可挂到公司或集团租户下' AFTER app_code");
+        addColumnIfMissing("parent_tenant_id", "ALTER TABLE tenant_registry ADD COLUMN parent_tenant_id BIGINT DEFAULT NULL COMMENT '父级租户ID。NEXIS 中项目可挂到公司或集团租户下' AFTER app_code");
         addIndexIfMissing("idx_tenant_registry_parent", "ALTER TABLE tenant_registry ADD INDEX idx_tenant_registry_parent (parent_tenant_id)");
     }
 

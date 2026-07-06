@@ -34,7 +34,7 @@ public class MessageController {
 
     @Operation(summary = "发送消息", description = "向当前租户内的一个或多个成员发送站内消息。")
     @PostMapping
-    public Result<MessageResponse> send(@Parameter(description = "应用编码，例如 PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<MessageResponse> send(@Parameter(description = "应用编码，例如 NEXIS、PRIMELOAD-MARKETPLACE")
                                         @PathVariable("appCode") String appCode,
                                         @RequestBody MessageSendRequest request,
                                         LoginUser loginUser) {
@@ -43,7 +43,7 @@ public class MessageController {
 
     @Operation(summary = "我的消息列表", description = "查询当前登录人在当前租户下收到的消息。")
     @GetMapping
-    public Result<PageResponse<MessageResponse>> list(@Parameter(description = "应用编码，例如 PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<PageResponse<MessageResponse>> list(@Parameter(description = "应用编码，例如 NEXIS、PRIMELOAD-MARKETPLACE")
                                                       @PathVariable("appCode") String appCode,
                                                       MessageQueryRequest request,
                                                       LoginUser loginUser) {
@@ -52,7 +52,7 @@ public class MessageController {
 
     @Operation(summary = "未读消息数", description = "查询当前登录人在当前租户下的未读消息数。")
     @GetMapping("/unread-count")
-    public Result<MessageUnreadCountResponse> unreadCount(@Parameter(description = "应用编码，例如 PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<MessageUnreadCountResponse> unreadCount(@Parameter(description = "应用编码，例如 NEXIS、PRIMELOAD-MARKETPLACE")
                                                           @PathVariable("appCode") String appCode,
                                                           LoginUser loginUser) {
         return Result.success(new MessageUnreadCountResponse(messageService.unreadCount(appCode, loginUser)));
@@ -60,7 +60,7 @@ public class MessageController {
 
     @Operation(summary = "标记单条消息已读", description = "把当前登录人收到的一条消息标记为已读。")
     @PutMapping("/{recipientId}/read")
-    public Result<MessageResponse> markRead(@Parameter(description = "应用编码，例如 PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<MessageResponse> markRead(@Parameter(description = "应用编码，例如 NEXIS、PRIMELOAD-MARKETPLACE")
                                             @PathVariable("appCode") String appCode,
                                             @Parameter(description = "消息接收记录 ID")
                                             @PathVariable("recipientId") Long recipientId,
@@ -70,7 +70,7 @@ public class MessageController {
 
     @Operation(summary = "全部标记已读", description = "把当前登录人在当前租户下的所有未读消息标记为已读。")
     @PutMapping("/read-all")
-    public Result<Void> markAllRead(@Parameter(description = "应用编码，例如 PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<Void> markAllRead(@Parameter(description = "应用编码，例如 NEXIS、PRIMELOAD-MARKETPLACE")
                                     @PathVariable("appCode") String appCode,
                                     LoginUser loginUser) {
         messageService.markAllRead(appCode, loginUser);

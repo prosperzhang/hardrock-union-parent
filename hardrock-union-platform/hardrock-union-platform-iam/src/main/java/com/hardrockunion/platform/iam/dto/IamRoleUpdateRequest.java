@@ -5,7 +5,7 @@ package com.hardrockunion.platform.iam.dto;
  */
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "共享角色更新请求。只有 WSGM 允许更新 WSGM、PMHUB、PRIMELOAD-MARKETPLACE 三端角色。")
+@Schema(description = "共享角色更新请求。只有 WSGM 允许更新 WSGM、NEXIS、PRIMELOAD-MARKETPLACE 三端角色。")
 public class IamRoleUpdateRequest {
 
     @Schema(description = "角色名称", example = "采购内勤")

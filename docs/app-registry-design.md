@@ -7,7 +7,7 @@
 `app_registry` 表示系统里有哪些 app，例如：
 
 - `WSGM`
-- `PMHUB`
+- `NEXIS`
 - `PRIMELOAD-MARKETPLACE`
 - 未来的 `WAREHOUSE`
 - 未来的 `LOGISTICS`

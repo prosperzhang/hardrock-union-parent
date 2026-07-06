@@ -130,10 +130,10 @@ POST /api/primeload-marketplace/orders/{id}/status
 POST /api/primeload-marketplace/orders/{id}/ship
 ```
 
-当前交易对象默认面向 `PMHUB`：
+当前交易对象默认面向 `NEXIS`：
 
-- `targetAppCode` 默认 `PMHUB`，本阶段只支持 `PMHUB`。
-- `targetTenantId` 表示 PMHUB 租户。
+- `targetAppCode` 默认 `NEXIS`，本阶段只支持 `NEXIS`。
+- `targetTenantId` 表示 NEXIS 租户。
 - `targetProjectName`、`targetSiteName`、`targetUserName`、`targetUserPhone` 先用文本承接。
 - 如果传了 `targetTenantId`，系统会校验它必须属于 `targetAppCode` 对应应用，且目标租户状态可用。
 
@@ -148,7 +148,7 @@ Merchant 业务入口必须满足：
 - 当前 tenant 必须属于 PRIMELOAD-MARKETPLACE
 - 当前 tenant 的 `tenant_type = MERCHANT`
 
-这能避免 PMHUB 或 WSGM token 误打到 merchant 业务。
+这能避免 NEXIS 或 WSGM token 误打到 merchant 业务。
 
 ## 7. Not In Phase 1
 

@@ -181,10 +181,10 @@ POST /api/primeload-marketplace/tenant-join-requests
 不要再恢复这些方向：
 
 - `/api/primeload-marketplace/merchant/register`
-- `/api/pmhub/public/register`
+- `/api/nexis/public/register`
 - solution 层自己创建 IAM 用户
 - solution 层自己维护登录流程
 - `MerchantMerchant` 作为商户注册主档
-- PMHUB/PRIMELOAD-MARKETPLACE 默认 admin 作为客户端验证入口
+- NEXIS/PRIMELOAD-MARKETPLACE 默认 admin 作为客户端验证入口
 
-WSGM 可以有平台默认管理员。PMHUB/PRIMELOAD-MARKETPLACE 是客户端用户自己注册、登录、创建或加入 tenant。
+WSGM 可以有平台默认管理员。NEXIS/PRIMELOAD-MARKETPLACE 是客户端用户自己注册、登录、创建或加入 tenant。

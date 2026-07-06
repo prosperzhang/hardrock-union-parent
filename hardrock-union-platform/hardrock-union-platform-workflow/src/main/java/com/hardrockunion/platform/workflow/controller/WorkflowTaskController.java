@@ -33,7 +33,7 @@ public class WorkflowTaskController {
 
     @Operation(summary = "创建审批任务", description = "在当前租户内创建一个审批任务，并通知处理人。")
     @PostMapping
-    public Result<WorkflowTaskResponse> create(@Parameter(description = "应用编码，例如 PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<WorkflowTaskResponse> create(@Parameter(description = "应用编码，例如 NEXIS、PRIMELOAD-MARKETPLACE")
                                                @PathVariable("appCode") String appCode,
                                                @RequestBody WorkflowTaskCreateRequest request,
                                                LoginUser loginUser) {
@@ -42,7 +42,7 @@ public class WorkflowTaskController {
 
     @Operation(summary = "我的待办", description = "查询当前登录人的审批任务。")
     @GetMapping("/mine")
-    public Result<PageResponse<WorkflowTaskResponse>> myTasks(@Parameter(description = "应用编码，例如 PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<PageResponse<WorkflowTaskResponse>> myTasks(@Parameter(description = "应用编码，例如 NEXIS、PRIMELOAD-MARKETPLACE")
                                                               @PathVariable("appCode") String appCode,
                                                               WorkflowTaskQueryRequest request,
                                                               LoginUser loginUser) {
@@ -51,7 +51,7 @@ public class WorkflowTaskController {
 
     @Operation(summary = "我的申请", description = "查询当前登录人提交的审批任务。")
     @GetMapping("/applications")
-    public Result<PageResponse<WorkflowTaskResponse>> myApplications(@Parameter(description = "应用编码，例如 PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<PageResponse<WorkflowTaskResponse>> myApplications(@Parameter(description = "应用编码，例如 NEXIS、PRIMELOAD-MARKETPLACE")
                                                                      @PathVariable("appCode") String appCode,
                                                                      WorkflowTaskQueryRequest request,
                                                                      LoginUser loginUser) {
@@ -60,7 +60,7 @@ public class WorkflowTaskController {
 
     @Operation(summary = "审批通过", description = "把当前登录人负责的待办任务审批通过，并通知申请人。")
     @PostMapping("/{taskId}/approve")
-    public Result<WorkflowTaskResponse> approve(@Parameter(description = "应用编码，例如 PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<WorkflowTaskResponse> approve(@Parameter(description = "应用编码，例如 NEXIS、PRIMELOAD-MARKETPLACE")
                                                 @PathVariable("appCode") String appCode,
                                                 @PathVariable("taskId") Long taskId,
                                                 @RequestBody WorkflowTaskReviewRequest request,
@@ -70,7 +70,7 @@ public class WorkflowTaskController {
 
     @Operation(summary = "审批驳回", description = "把当前登录人负责的待办任务驳回，并通知申请人。")
     @PostMapping("/{taskId}/reject")
-    public Result<WorkflowTaskResponse> reject(@Parameter(description = "应用编码，例如 PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<WorkflowTaskResponse> reject(@Parameter(description = "应用编码，例如 NEXIS、PRIMELOAD-MARKETPLACE")
                                                @PathVariable("appCode") String appCode,
                                                @PathVariable("taskId") Long taskId,
                                                @RequestBody WorkflowTaskReviewRequest request,

@@ -23,13 +23,13 @@ public class TenantOnboardingStatusResponse {
     private String memberStatus;
     @Schema(description = "已分配部门ID", example = "72217422662279197")
     private Long departmentId;
-    @Schema(description = "已分配部门编码", example = "PMHUB_ENGINEERING_DEPT")
+    @Schema(description = "已分配部门编码", example = "NEXIS_ENGINEERING_DEPT")
     private String departmentCode;
     @Schema(description = "已分配部门名称", example = "工程部")
     private String departmentName;
     @Schema(description = "已分配部门简称", example = "工程")
     private String departmentShortName;
-    @Schema(description = "角色编码列表", example = "[\"PMHUB_CONSTRUCTION_OFFICER\"]")
+    @Schema(description = "角色编码列表", example = "[\"NEXIS_CONSTRUCTION_OFFICER\"]")
     private List<String> roleCodes;
     @Schema(description = "状态说明", example = "已加入租户空间，正在等待管理员分配部门和角色。")
     private String message;

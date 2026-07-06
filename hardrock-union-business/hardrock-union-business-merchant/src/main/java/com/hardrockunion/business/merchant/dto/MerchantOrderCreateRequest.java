@@ -13,11 +13,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "MerchantOrderCreateRequest", description = "商城订单创建请求")
 public class MerchantOrderCreateRequest {
 
-    // 目标应用，默认按 pmhub 侧对象处理。
-    @Schema(description = "目标应用编码，当前默认对接 PMHUB", example = "PMHUB")
+    // 目标应用，默认按 nexis 侧对象处理。
+    @Schema(description = "目标应用编码，当前默认对接 NEXIS", example = "NEXIS")
     private String targetAppCode;
     // 目标租户。
-    @Schema(description = "目标租户 ID，一般对应 pmhub 的公司租户", example = "2001")
+    @Schema(description = "目标租户 ID，一般对应 nexis 的公司租户", example = "2001")
     private Long targetTenantId;
     // 目标项目名称。
     @Schema(description = "目标项目名称", example = "浦东新区学校改造项目")

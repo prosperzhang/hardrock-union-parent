@@ -9,7 +9,7 @@ import com.hardrockunion.infrastructure.db.page.PageRequest;
 /**
  * 报价单列表查询条件。
  *
- * <p>重点支持按 `pmhub` 交易目标字段筛选报价单。
+ * <p>重点支持按 `nexis` 交易目标字段筛选报价单。
  */
 public class MerchantQuotationQueryRequest extends PageRequest {
 
@@ -17,7 +17,7 @@ public class MerchantQuotationQueryRequest extends PageRequest {
     private String quotationStatus;
     // 报价单关键词，当前匹配报价单号、联系人和联系电话。
     private String quotationKeyword;
-    // 目标租户，一般对应 pmhub 里的公司租户。
+    // 目标租户，一般对应 nexis 里的公司租户。
     private Long targetTenantId;
     // 目标项目名称，当前按模糊匹配处理。
     private String targetProjectName;

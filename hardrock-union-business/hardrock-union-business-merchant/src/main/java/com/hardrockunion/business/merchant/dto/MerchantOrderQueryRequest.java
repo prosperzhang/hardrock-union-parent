@@ -9,7 +9,7 @@ import com.hardrockunion.infrastructure.db.page.PageRequest;
 /**
  * 订单列表查询条件。
  *
- * <p>既支持订单自身字段筛选，也支持按 `pmhub` 交易目标筛单。
+ * <p>既支持订单自身字段筛选，也支持按 `nexis` 交易目标筛单。
  */
 public class MerchantOrderQueryRequest extends PageRequest {
 
@@ -19,7 +19,7 @@ public class MerchantOrderQueryRequest extends PageRequest {
     private String orderKeyword;
     // 兼容旧查询习惯，当前会匹配 customerName 和 customerPhone。
     private String customerKeyword;
-    // 目标租户，一般对应 pmhub 里的公司租户。
+    // 目标租户，一般对应 nexis 里的公司租户。
     private Long targetTenantId;
     // 目标项目名称，当前按模糊匹配处理。
     private String targetProjectName;

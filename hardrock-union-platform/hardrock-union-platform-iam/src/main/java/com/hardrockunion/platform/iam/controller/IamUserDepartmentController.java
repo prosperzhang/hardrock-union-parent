@@ -38,7 +38,7 @@ public class IamUserDepartmentController {
 
     @Operation(summary = "查询用户主部门", description = "返回指定用户当前绑定的主部门。")
     @GetMapping("/{userId}/department")
-    public Result<IamDepartmentResponse> getUserDepartment(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<IamDepartmentResponse> getUserDepartment(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                             @PathVariable("appCode") String appCode,
                                                             @Parameter(description = "用户ID")
                                                             @PathVariable("userId") Long userId,
@@ -48,7 +48,7 @@ public class IamUserDepartmentController {
 
     @Operation(summary = "绑定用户主部门", description = "把指定用户绑定到一个部门，并设为主部门。")
     @PutMapping("/{userId}/department")
-    public Result<IamDepartmentResponse> assignUserDepartment(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<IamDepartmentResponse> assignUserDepartment(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                               @PathVariable("appCode") String appCode,
                                                               @Parameter(description = "用户ID")
                                                               @PathVariable("userId") Long userId,
@@ -59,7 +59,7 @@ public class IamUserDepartmentController {
 
     @Operation(summary = "查询用户部门列表", description = "返回指定用户当前所属的所有部门，包含主部门标记。")
     @GetMapping("/{userId}/departments")
-    public Result<List<IamUserDepartmentResponse>> listUserDepartments(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<List<IamUserDepartmentResponse>> listUserDepartments(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                                        @PathVariable("appCode") String appCode,
                                                                        @Parameter(description = "用户ID")
                                                                        @PathVariable("userId") Long userId,
@@ -69,7 +69,7 @@ public class IamUserDepartmentController {
 
     @Operation(summary = "切换用户主部门", description = "把指定用户的主部门切换到已加入的另一个部门。")
     @PutMapping("/{userId}/department/switch")
-    public Result<IamDepartmentResponse> switchUserDepartment(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<IamDepartmentResponse> switchUserDepartment(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                               @PathVariable("appCode") String appCode,
                                                               @Parameter(description = "用户ID")
                                                               @PathVariable("userId") Long userId,

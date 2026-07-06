@@ -37,7 +37,7 @@ import com.hardrockunion.infrastructure.db.page.PageResponse;
  *
  * <p>这里负责 商户侧的报价单主链路，包括：
  * 报价单创建、按交易目标筛选、详情查询，以及把报价单转换成订单。
- * 报价单面向的交易对象不是本地“客户主数据”，而是后续会逐步对接到 `pmhub` 的项目、工地和联系人。
+ * 报价单面向的交易对象不是本地“客户主数据”，而是后续会逐步对接到 `nexis` 的项目、工地和联系人。
  */
 @Service
 public class MerchantQuotationService {
@@ -399,9 +399,9 @@ public class MerchantQuotationService {
 
     private String normalizeTargetAppCode(String targetAppCode) {
         String normalized = StringUtils.upperCase(StringUtils.trimToEmpty(targetAppCode));
-        String appCode = StringUtils.defaultIfBlank(normalized, "PMHUB");
-        if (!StringUtils.equals(appCode, "PMHUB")) {
-            throw new BusinessException("targetAppCode 当前仅支持 PMHUB");
+        String appCode = StringUtils.defaultIfBlank(normalized, "NEXIS");
+        if (!StringUtils.equals(appCode, "NEXIS")) {
+            throw new BusinessException("targetAppCode 当前仅支持 NEXIS");
         }
         return appCode;
     }

@@ -11,7 +11,7 @@ public class IamUserResponse {
 
     // 用户主键。
     private Long id;
-    // 所属应用，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE。
+    // 所属应用，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE。
     private String appCode;
     // 所属租户。
     private Long tenantId;

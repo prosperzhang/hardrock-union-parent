@@ -471,13 +471,13 @@ public class MerchantOrderService {
     }
 
     /**
-     * 没有显式指定目标应用时，当前商城默认把交易对象视为 `pmhub` 侧对象。
+     * 没有显式指定目标应用时，当前商城默认把交易对象视为 `nexis` 侧对象。
      */
     private String normalizeTargetAppCode(String targetAppCode) {
         String normalized = StringUtils.upperCase(StringUtils.trimToEmpty(targetAppCode));
-        String appCode = StringUtils.defaultIfBlank(normalized, "PMHUB");
-        if (!StringUtils.equals(appCode, "PMHUB")) {
-            throw new BusinessException("targetAppCode 当前仅支持 PMHUB");
+        String appCode = StringUtils.defaultIfBlank(normalized, "NEXIS");
+        if (!StringUtils.equals(appCode, "NEXIS")) {
+            throw new BusinessException("targetAppCode 当前仅支持 NEXIS");
         }
         return appCode;
     }

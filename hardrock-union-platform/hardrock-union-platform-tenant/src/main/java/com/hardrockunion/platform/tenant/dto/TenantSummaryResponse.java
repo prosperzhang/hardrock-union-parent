@@ -7,17 +7,17 @@ public class TenantSummaryResponse {
 
     @Schema(description = "项目租户ID", example = "75668854082945026")
     private Long tenantId;
-    @Schema(description = "父级租户ID。PMHUB 项目可挂到公司或集团下", example = "75668854082945026")
+    @Schema(description = "父级租户ID。NEXIS 项目可挂到公司或集团下", example = "75668854082945026")
     private Long parentTenantId;
     @Schema(description = "父级租户名称", example = "陕西某某建设有限公司")
     private String parentTenantName;
-    @Schema(description = "父级租户编码", example = "PMHUB-COMPANY-ABC12345")
+    @Schema(description = "父级租户编码", example = "NEXIS-COMPANY-ABC12345")
     private String parentTenantCode;
-    @Schema(description = "租户类型。PMHUB 支持 GROUP、COMPANY、PROJECT", example = "PROJECT")
+    @Schema(description = "租户类型。NEXIS 支持 GROUP、COMPANY、PROJECT", example = "PROJECT")
     private String tenantType;
     @Schema(description = "项目租户名称", example = "张栋俊测试项目A")
     private String tenantName;
-    @Schema(description = "项目租户编码", example = "PMHUB-20260423120000")
+    @Schema(description = "项目租户编码", example = "NEXIS-20260423120000")
     private String tenantCode;
     @Schema(description = "租户来源，例如 PRIMELOAD_SELF_OPERATED 表示一车好料商城自营", example = "PRIMELOAD_SELF_OPERATED")
     private String tenantSource;

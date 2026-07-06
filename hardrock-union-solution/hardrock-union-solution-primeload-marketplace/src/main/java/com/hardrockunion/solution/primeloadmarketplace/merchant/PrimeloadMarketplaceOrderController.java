@@ -43,7 +43,7 @@ public class PrimeloadMarketplaceOrderController {
         return Result.success(merchantOrderService.list(request, loginUser));
     }
 
-    @Operation(summary = "订单详情", description = "查看订单头信息、目标 PMHUB 交易对象、履约信息和订单明细。")
+    @Operation(summary = "订单详情", description = "查看订单头信息、目标 NEXIS 交易对象、履约信息和订单明细。")
     @GetMapping("/{id}")
     public Result<MerchantOrderResponse> getById(@Parameter(description = "订单 ID")
                                                  @PathVariable("id") Long id,
@@ -51,7 +51,7 @@ public class PrimeloadMarketplaceOrderController {
         return Result.success(merchantOrderService.getById(id, loginUser));
     }
 
-    @Operation(summary = "创建订单", description = "创建 PRIMELOAD-MARKETPLACE 商户订单，绑定 PMHUB 项目/工地/联系人。")
+    @Operation(summary = "创建订单", description = "创建 PRIMELOAD-MARKETPLACE 商户订单，绑定 NEXIS 项目/工地/联系人。")
     @PostMapping
     public Result<MerchantOrderResponse> create(@RequestBody MerchantOrderCreateRequest request, LoginUser loginUser) {
         return Result.success(merchantOrderService.create(request, loginUser));

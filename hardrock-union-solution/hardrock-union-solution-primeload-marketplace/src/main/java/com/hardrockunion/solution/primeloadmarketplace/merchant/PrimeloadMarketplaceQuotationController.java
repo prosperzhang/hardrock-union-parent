@@ -43,7 +43,7 @@ public class PrimeloadMarketplaceQuotationController {
         return Result.success(merchantQuotationService.list(request, loginUser));
     }
 
-    @Operation(summary = "报价单详情", description = "查看报价单头信息、目标 PMHUB 交易对象和报价明细。")
+    @Operation(summary = "报价单详情", description = "查看报价单头信息、目标 NEXIS 交易对象和报价明细。")
     @GetMapping("/{id}")
     public Result<MerchantQuotationResponse> getById(@Parameter(description = "报价单 ID")
                                                      @PathVariable("id") Long id,
@@ -51,7 +51,7 @@ public class PrimeloadMarketplaceQuotationController {
         return Result.success(merchantQuotationService.getById(id, loginUser));
     }
 
-    @Operation(summary = "创建报价单", description = "面向 PMHUB 交易对象创建报价单。")
+    @Operation(summary = "创建报价单", description = "面向 NEXIS 交易对象创建报价单。")
     @PostMapping
     public Result<MerchantQuotationResponse> create(@RequestBody MerchantQuotationCreateRequest request, LoginUser loginUser) {
         return Result.success(merchantQuotationService.create(request, loginUser));

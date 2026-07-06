@@ -41,7 +41,7 @@ public class IamDepartmentController {
 
     @Operation(summary = "查询部门列表", description = "返回当前 app 下所有部门。")
     @GetMapping
-    public Result<List<IamDepartmentResponse>> list(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<List<IamDepartmentResponse>> list(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                     @PathVariable("appCode") String appCode,
                                                     LoginUser loginUser) {
         return Result.success(iamDepartmentQueryService.listDepartments(appCode, loginUser));
@@ -49,7 +49,7 @@ public class IamDepartmentController {
 
     @Operation(summary = "查询部门详情", description = "返回指定部门的完整信息。")
     @GetMapping("/{departmentId}")
-    public Result<IamDepartmentResponse> detail(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<IamDepartmentResponse> detail(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                 @PathVariable("appCode") String appCode,
                                                 @Parameter(description = "部门ID")
                                                 @PathVariable("departmentId") Long departmentId,
@@ -59,7 +59,7 @@ public class IamDepartmentController {
 
     @Operation(summary = "创建部门", description = "在当前 app 下创建一个部门。")
     @PostMapping
-    public Result<IamDepartmentResponse> create(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<IamDepartmentResponse> create(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                 @PathVariable("appCode") String appCode,
                                                 @RequestBody IamDepartmentCreateRequest request,
                                                 LoginUser loginUser) {
@@ -68,7 +68,7 @@ public class IamDepartmentController {
 
     @Operation(summary = "更新部门", description = "更新部门名称、上级、类型、状态、排序。")
     @PutMapping("/{departmentId}")
-    public Result<IamDepartmentResponse> update(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<IamDepartmentResponse> update(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                 @PathVariable("appCode") String appCode,
                                                 @Parameter(description = "部门ID")
                                                 @PathVariable("departmentId") Long departmentId,
@@ -79,7 +79,7 @@ public class IamDepartmentController {
 
     @Operation(summary = "删除部门", description = "逻辑删除部门。若部门下还有成员，则不允许删除。")
     @DeleteMapping("/{departmentId}")
-    public Result<Void> delete(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<Void> delete(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                @PathVariable("appCode") String appCode,
                                @Parameter(description = "部门ID")
                                @PathVariable("departmentId") Long departmentId,
@@ -90,7 +90,7 @@ public class IamDepartmentController {
 
     @Operation(summary = "查询部门角色", description = "返回部门当前绑定的角色。")
     @GetMapping("/{departmentId}/roles")
-    public Result<List<com.hardrockunion.platform.iam.dto.IamRoleResponse>> listRoles(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<List<com.hardrockunion.platform.iam.dto.IamRoleResponse>> listRoles(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                                                       @PathVariable("appCode") String appCode,
                                                                                       @Parameter(description = "部门ID")
                                                                                       @PathVariable("departmentId") Long departmentId,
@@ -100,7 +100,7 @@ public class IamDepartmentController {
 
     @Operation(summary = "查询部门成员", description = "返回部门当前成员列表，包含成员的主部门与角色信息。")
     @GetMapping("/{departmentId}/members")
-    public Result<List<IamUserResponse>> listMembers(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<List<IamUserResponse>> listMembers(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                     @PathVariable("appCode") String appCode,
                                                     @Parameter(description = "部门ID")
                                                     @PathVariable("departmentId") Long departmentId,
@@ -110,7 +110,7 @@ public class IamDepartmentController {
 
     @Operation(summary = "更新部门角色", description = "覆盖式更新部门绑定的角色集合。")
     @PutMapping("/{departmentId}/roles")
-    public Result<IamDepartmentResponse> assignRoles(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<IamDepartmentResponse> assignRoles(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                      @PathVariable("appCode") String appCode,
                                                      @Parameter(description = "部门ID")
                                                      @PathVariable("departmentId") Long departmentId,

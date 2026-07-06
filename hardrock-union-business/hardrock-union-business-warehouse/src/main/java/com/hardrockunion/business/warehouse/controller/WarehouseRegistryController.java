@@ -32,7 +32,7 @@ public class WarehouseRegistryController {
 
     @Operation(summary = "查询当前租户数字仓库", description = "返回当前租户下的项目仓或商家仓。")
     @GetMapping
-    public Result<List<WarehouseResponse>> list(@Parameter(description = "应用编码，例如 PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<List<WarehouseResponse>> list(@Parameter(description = "应用编码，例如 NEXIS、PRIMELOAD-MARKETPLACE")
                                                 @PathVariable("appCode") String appCode,
                                                 LoginUser loginUser) {
         return Result.success(warehouseRegistryService.listCurrentTenantWarehouses(appCode, loginUser));
@@ -40,7 +40,7 @@ public class WarehouseRegistryController {
 
     @Operation(summary = "创建数字仓库", description = "用于 WSGM 综合仓、云仓、商家仓、项目仓等仓库注册。")
     @PostMapping
-    public Result<WarehouseResponse> create(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<WarehouseResponse> create(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                             @PathVariable("appCode") String appCode,
                                             @RequestBody WarehouseCreateRequest request,
                                             LoginUser loginUser) {

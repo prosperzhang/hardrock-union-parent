@@ -9,9 +9,9 @@ public class IamPermissionResponse {
 
     @Schema(description = "权限ID", example = "72000000000000001")
     private Long id;
-    @Schema(description = "应用编码", example = "PMHUB")
+    @Schema(description = "应用编码", example = "NEXIS")
     private String appCode;
-    @Schema(description = "权限编码", example = "PMHUB_PROJECT_MANAGE")
+    @Schema(description = "权限编码", example = "NEXIS_PROJECT_MANAGE")
     private String permissionCode;
     @Schema(description = "权限名称", example = "项目管理")
     private String permissionName;
@@ -19,11 +19,11 @@ public class IamPermissionResponse {
     private String permissionType;
     @Schema(description = "上级权限ID", example = "0")
     private Long parentId;
-    @Schema(description = "前端路径或资源路径", example = "/api/pmhub/tenants/projects")
+    @Schema(description = "前端路径或资源路径", example = "/api/nexis/tenants/projects")
     private String permissionPath;
     @Schema(description = "HTTP方法", example = "GET")
     private String httpMethod;
-    @Schema(description = "前端组件标识", example = "PmhubProjectPage")
+    @Schema(description = "前端组件标识", example = "NexisProjectPage")
     private String component;
     @Schema(description = "状态，1启用，0停用", example = "1")
     private Integer status;

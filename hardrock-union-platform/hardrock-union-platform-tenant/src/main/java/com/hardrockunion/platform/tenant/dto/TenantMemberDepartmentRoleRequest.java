@@ -10,7 +10,7 @@ public class TenantMemberDepartmentRoleRequest {
     @Schema(description = "部门ID", example = "72217422662279197")
     private Long departmentId;
 
-    @Schema(description = "该部门下的角色编码列表", example = "[\"PMHUB_CONSTRUCTION_OFFICER\"]")
+    @Schema(description = "该部门下的角色编码列表", example = "[\"NEXIS_CONSTRUCTION_OFFICER\"]")
     private List<String> roleCodes;
 
     public Long getDepartmentId() {

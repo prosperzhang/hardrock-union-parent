@@ -28,14 +28,14 @@ That means:
 
 - `hardrock-union-solution-wsgm`
   can still carry stronger business meaning because `wsgm` is a headquarters-oriented internal system with high customization
-- `hardrock-union-solution-pmhub`
+- `hardrock-union-solution-nexis`
   should mainly compose `platform + business-project`
 - `hardrock-union-solution-primeload-marketplace`
   should mainly compose `platform + business-merchant`
 
 ## 3. What Solution Modules Should Contain
 
-Suitable content for `solution-pmhub` and `solution-primeload-marketplace`:
+Suitable content for `solution-nexis` and `solution-primeload-marketplace`:
 
 - app startup aggregation dependencies
 - app-specific menu tree and navigation metadata
@@ -48,14 +48,14 @@ Suitable content for `solution-pmhub` and `solution-primeload-marketplace`:
 
 Examples:
 
-- `pmhub` homepage needs project statistics, site alerts, task summary
+- `nexis` homepage needs project statistics, site alerts, task summary
 - `primeload-marketplace` homepage needs merchant profile summary, product inventory summary, quotation summary
 
 These are app views of multiple business capabilities, so they belong in `solution`.
 
 ## 4. What Solution Modules Should Not Contain
 
-The following should not primarily live in `solution-pmhub` or `solution-primeload-marketplace`:
+The following should not primarily live in `solution-nexis` or `solution-primeload-marketplace`:
 
 - reusable core project domain models
 - reusable merchant domain models
@@ -78,20 +78,20 @@ Recommended module mapping:
   project company, project, site, inspection, task, reporting
 - `hardrock-union-business-merchant`
   merchant profile, goods, catalog, quotation, order, fulfillment
-- `hardrock-union-solution-pmhub`
-  compose project business into PMHub app
+- `hardrock-union-solution-nexis`
+  compose project business into Nexis app
 - `hardrock-union-solution-primeload-marketplace`
   compose merchant business into PRIMELOAD-MARKETPLACE app
 
 ## 6. Suggested Package Structure
 
-Suggested package layout for `solution-pmhub`:
+Suggested package layout for `solution-nexis`:
 
-- `com.hardrockunion.solution.pmhub.dashboard`
-- `com.hardrockunion.solution.pmhub.facade`
-- `com.hardrockunion.solution.pmhub.menu`
-- `com.hardrockunion.solution.pmhub.config`
-- `com.hardrockunion.solution.pmhub.integration`
+- `com.hardrockunion.solution.nexis.dashboard`
+- `com.hardrockunion.solution.nexis.facade`
+- `com.hardrockunion.solution.nexis.menu`
+- `com.hardrockunion.solution.nexis.config`
+- `com.hardrockunion.solution.nexis.integration`
 
 Suggested package layout for `solution-primeload-marketplace`:
 
@@ -115,14 +115,14 @@ If the capability exists to present, assemble, tailor, or orchestrate business c
 
 For the current project, the working rule should be:
 
-- `pmhub` core business goes to `hardrock-union-business-project`
+- `nexis` core business goes to `hardrock-union-business-project`
 - `primeload-marketplace` core business goes to `hardrock-union-business-merchant`
-- `solution-pmhub` and `solution-primeload-marketplace` stay as app shells
+- `solution-nexis` and `solution-primeload-marketplace` stay as app shells
 - `wsgm` can temporarily keep stronger business weight in `solution-wsgm`
 
 ## 9. Immediate Follow-up
 
-Recommended next steps for `solution-pmhub` and `solution-primeload-marketplace`:
+Recommended next steps for `solution-nexis` and `solution-primeload-marketplace`:
 
 1. Keep them lightweight and dependency-oriented
 2. Add app dashboard/facade packages when needed

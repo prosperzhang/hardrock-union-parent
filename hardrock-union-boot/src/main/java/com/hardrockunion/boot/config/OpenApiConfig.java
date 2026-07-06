@@ -58,10 +58,10 @@ public class OpenApiConfig {
     }
 
     @Bean
-    public GroupedOpenApi pmhubApi() {
+    public GroupedOpenApi nexisApi() {
         return GroupedOpenApi.builder()
-            .group("pmhub")
-            .pathsToMatch("/api/pmhub/**")
+            .group("nexis")
+            .pathsToMatch("/api/nexis/**")
             .build();
     }
 

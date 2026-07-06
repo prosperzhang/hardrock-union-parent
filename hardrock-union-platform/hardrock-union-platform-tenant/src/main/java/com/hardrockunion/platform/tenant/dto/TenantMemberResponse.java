@@ -16,7 +16,7 @@ public class TenantMemberResponse {
     private String tenantName;
     @Schema(description = "用户ID", example = "75669421022519297")
     private Long userId;
-    @Schema(description = "用户名", example = "pmhub_join_migrate_20260422_2156")
+    @Schema(description = "用户名", example = "nexis_join_migrate_20260422_2156")
     private String username;
     @Schema(description = "昵称", example = "李四")
     private String nickName;
@@ -28,11 +28,11 @@ public class TenantMemberResponse {
     private LocalDateTime joinedAt;
     @Schema(description = "部门ID", example = "72217422662279195")
     private Long departmentId;
-    @Schema(description = "部门编码", example = "PMHUB_ENGINEERING_DEPT")
+    @Schema(description = "部门编码", example = "NEXIS_ENGINEERING_DEPT")
     private String departmentCode;
     @Schema(description = "部门名称", example = "工程部")
     private String departmentName;
-    @Schema(description = "角色编码列表", example = "[\"PMHUB_CONSTRUCTION_OFFICER\"]")
+    @Schema(description = "角色编码列表", example = "[\"NEXIS_CONSTRUCTION_OFFICER\"]")
     private List<String> roleCodes;
     @Schema(description = "按部门分组的角色列表。一个成员可同时属于多个部门，每个部门可有多个角色。")
     private List<TenantMemberDepartmentRoleResponse> departmentRoles;

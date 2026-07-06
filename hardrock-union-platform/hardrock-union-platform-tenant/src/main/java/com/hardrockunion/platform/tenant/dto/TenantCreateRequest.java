@@ -5,15 +5,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "创建租户空间请求。")
 public class TenantCreateRequest {
 
-    @Schema(description = "租户类型。PMHUB 支持 GROUP、COMPANY、PROJECT；不传时按当前 app 默认类型创建。", example = "PROJECT")
+    @Schema(description = "租户类型。NEXIS 支持 GROUP、COMPANY、PROJECT；不传时按当前 app 默认类型创建。", example = "PROJECT")
     private String tenantType;
-    @Schema(description = "父级租户ID。PMHUB 项目可填写所属公司或集团租户ID。", example = "75668854082945026")
+    @Schema(description = "父级租户ID。NEXIS 项目可填写所属公司或集团租户ID。", example = "75668854082945026")
     private Long parentTenantId;
-    @Schema(description = "租户空间名称。PMHUB 为项目名称，PRIMELOAD-MARKETPLACE 为商户名称。", example = "张栋俊测试项目A")
+    @Schema(description = "租户空间名称。NEXIS 为项目名称，PRIMELOAD-MARKETPLACE 为商户名称。", example = "张栋俊测试项目A")
     private String tenantName;
-    @Schema(description = "租户空间编码。不传时系统按 app 自动生成。", example = "PMHUB-20260423120000")
+    @Schema(description = "租户空间编码。不传时系统按 app 自动生成。", example = "NEXIS-20260423120000")
     private String tenantCode;
-    @Schema(description = "地址。PMHUB 为项目地址，PRIMELOAD-MARKETPLACE 可作为商户经营地址。", example = "苏州工业园区星湖街 99 号")
+    @Schema(description = "地址。NEXIS 为项目地址，PRIMELOAD-MARKETPLACE 可作为商户经营地址。", example = "苏州工业园区星湖街 99 号")
     private String projectAddress;
     @Schema(description = "省级行政区编码", example = "610000")
     private String provinceCode;

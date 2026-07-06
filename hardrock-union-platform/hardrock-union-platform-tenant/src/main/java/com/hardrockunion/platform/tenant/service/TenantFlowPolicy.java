@@ -22,14 +22,14 @@ public class TenantFlowPolicy {
                 List.of("WSGM_SUPER_ADMIN"),
                 "WSGM"
             );
-            case "PMHUB" -> new AppTenantPolicy(
-                "PMHUB",
+            case "NEXIS" -> new AppTenantPolicy(
+                "NEXIS",
                 "PROJECT",
                 "项目",
                 "创建项目或加入项目",
-                "PMHUB_DECISION_DEPT",
-                List.of("PMHUB_DECISION_LEADER"),
-                "PMHUB"
+                "NEXIS_DECISION_DEPT",
+                List.of("NEXIS_DECISION_LEADER"),
+                "NEXIS"
             );
             case "PRIMELOAD-MARKETPLACE" -> new AppTenantPolicy(
                 "PRIMELOAD-MARKETPLACE",

@@ -86,7 +86,7 @@
 
         <dependency>
             <groupId>com.hardrockunion</groupId>
-            <artifactId>hardrock-union-solution-pmhub</artifactId>
+            <artifactId>hardrock-union-solution-nexis</artifactId>
             <version>${project.version}</version>
         </dependency>
 

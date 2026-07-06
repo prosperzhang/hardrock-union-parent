@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * 报价单返回模型。
  *
- * <p>除了报价单自身信息，也会带回指向 `pmhub` 的交易对象信息和报价明细。
+ * <p>除了报价单自身信息，也会带回指向 `nexis` 的交易对象信息和报价明细。
  */
 public class MerchantQuotationResponse {
 
@@ -23,7 +23,7 @@ public class MerchantQuotationResponse {
     private String merchantName;
     // 目标应用 ID。
     private Long targetAppId;
-    // 目标应用，当前默认是 PMHUB。
+    // 目标应用，当前默认是 NEXIS。
     private String targetAppCode;
     // 目标租户。
     private Long targetTenantId;

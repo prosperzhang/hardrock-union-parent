@@ -8,7 +8,7 @@ public class AppRegistryResponse {
     @Schema(description = "主键", example = "1")
     private Long id;
 
-    @Schema(description = "应用编码", example = "PMHUB")
+    @Schema(description = "应用编码", example = "NEXIS")
     private String appCode;
 
     @Schema(description = "应用名称", example = "项目协同")
@@ -17,10 +17,10 @@ public class AppRegistryResponse {
     @Schema(description = "应用类型", example = "SAAS_PLATFORM")
     private String appType;
 
-    @Schema(description = "首页路径", example = "/pmhub")
+    @Schema(description = "首页路径", example = "/nexis")
     private String homePath;
 
-    @Schema(description = "登录路径", example = "/pmhub/login")
+    @Schema(description = "登录路径", example = "/nexis/login")
     private String loginPath;
 
     @Schema(description = "图标", example = "https://example.com/icon.png")

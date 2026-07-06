@@ -15,5 +15,5 @@ model.
 
 ## Current References
 
-- [PMHub TenantRegistry/IAM Final Model](/Users/castor/Desktop/hardrock-union-parent/docs/pmhub-tenant-iam-final-model.md)
+- [Nexis TenantRegistry/IAM Final Model](/Users/castor/Desktop/hardrock-union-parent/docs/nexis-tenant-iam-final-model.md)
 - [Architecture Overview](/Users/castor/Desktop/hardrock-union-parent/docs/architecture-overview.md)

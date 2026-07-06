@@ -23,11 +23,11 @@ import com.hardrockunion.platform.tenant.event.TenantCreatedEvent;
 public class TenantWorkspaceFlowService {
 
     private static final String PRIMELOAD_MARKETPLACE = "PRIMELOAD-MARKETPLACE";
-    private static final String PMHUB = "PMHUB";
+    private static final String NEXIS = "NEXIS";
     private static final String SELF_OPERATED_MERCHANT = "SELF_OPERATED_MERCHANT";
-    private static final String PMHUB_GROUP = "GROUP";
-    private static final String PMHUB_COMPANY = "COMPANY";
-    private static final String PMHUB_PROJECT = "PROJECT";
+    private static final String NEXIS_GROUP = "GROUP";
+    private static final String NEXIS_COMPANY = "COMPANY";
+    private static final String NEXIS_PROJECT = "PROJECT";
 
     private final TenantRegistryService tenantRegistryService;
     private final TenantMemberFlowService tenantMemberFlowService;
@@ -209,16 +209,16 @@ public class TenantWorkspaceFlowService {
         if (requestedTenantType == null) {
             return policy.tenantType();
         }
-        if (!StringUtils.equalsIgnoreCase(PMHUB, policy.appCode())) {
+        if (!StringUtils.equalsIgnoreCase(NEXIS, policy.appCode())) {
             if (StringUtils.equalsIgnoreCase(policy.tenantType(), requestedTenantType)) {
                 return policy.tenantType();
             }
             throw new BusinessException("当前 app 不支持自定义租户类型");
         }
-        if (StringUtils.equalsAny(requestedTenantType, PMHUB_GROUP, PMHUB_COMPANY, PMHUB_PROJECT)) {
+        if (StringUtils.equalsAny(requestedTenantType, NEXIS_GROUP, NEXIS_COMPANY, NEXIS_PROJECT)) {
             return requestedTenantType;
         }
-        throw new BusinessException("PMHub tenantType 仅支持 GROUP、COMPANY、PROJECT");
+        throw new BusinessException("Nexis tenantType 仅支持 GROUP、COMPANY、PROJECT");
     }
 
     private boolean isSameAppLogin(TenantFlowPolicy.AppTenantPolicy policy, LoginUser loginUser) {
@@ -226,8 +226,8 @@ public class TenantWorkspaceFlowService {
     }
 
     private boolean isPolicyTenant(TenantFlowPolicy.AppTenantPolicy policy, TenantRegistryResponse tenant) {
-        if (StringUtils.equalsIgnoreCase(PMHUB, policy.appCode())) {
-            return StringUtils.equalsAnyIgnoreCase(tenant.getTenantType(), PMHUB_GROUP, PMHUB_COMPANY, PMHUB_PROJECT);
+        if (StringUtils.equalsIgnoreCase(NEXIS, policy.appCode())) {
+            return StringUtils.equalsAnyIgnoreCase(tenant.getTenantType(), NEXIS_GROUP, NEXIS_COMPANY, NEXIS_PROJECT);
         }
         if (StringUtils.equalsIgnoreCase(policy.tenantType(), tenant.getTenantType())) {
             return true;
@@ -243,7 +243,7 @@ public class TenantWorkspaceFlowService {
         if (currentTenantId.equals(tenant.getId())) {
             return true;
         }
-        if (!StringUtils.equalsIgnoreCase(PMHUB, policy.appCode())) {
+        if (!StringUtils.equalsIgnoreCase(NEXIS, policy.appCode())) {
             return false;
         }
         return currentTenantId.equals(tenant.getParentTenantId());

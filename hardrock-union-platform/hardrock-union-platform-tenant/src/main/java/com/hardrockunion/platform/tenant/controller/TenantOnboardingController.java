@@ -27,7 +27,7 @@ public class TenantOnboardingController {
 
     @Operation(summary = "查询当前用户入驻状态", description = "用于前端判断当前用户应进入创建/加入租户空间、等待审批、等待分配角色，还是直接进入系统。")
     @GetMapping("/status")
-    public Result<TenantOnboardingStatusResponse> getStatus(@Parameter(description = "应用编码，例如 PMHUB")
+    public Result<TenantOnboardingStatusResponse> getStatus(@Parameter(description = "应用编码，例如 NEXIS")
                                                             @PathVariable("appCode") String appCode,
                                                             LoginUser loginUser) {
         return Result.success(tenantOnboardingFlowService.getStatus(appCode, loginUser));

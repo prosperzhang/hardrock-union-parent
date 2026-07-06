@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "权限矩阵响应。用于前端按部门、角色配置菜单权限。")
 public class IamPermissionMatrixResponse {
 
-    @Schema(description = "应用编码", example = "PMHUB")
+    @Schema(description = "应用编码", example = "NEXIS")
     private String appCode;
 
     @Schema(description = "可分配菜单权限树")

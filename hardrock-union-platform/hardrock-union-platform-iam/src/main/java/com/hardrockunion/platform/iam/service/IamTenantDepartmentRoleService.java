@@ -21,7 +21,7 @@ public class IamTenantDepartmentRoleService {
     private static final String TABLE_NAME = "iam_tenant_member_department_role";
     private static final List<String> TENANT_UNIQUE_ROLE_CODES = List.of(
         "WSGM_SUPER_ADMIN",
-        "PMHUB_DECISION_LEADER",
+        "NEXIS_DECISION_LEADER",
         "PRIMELOAD_MARKETPLACE_DECISION_LEADER",
         "PRIMELOAD_LOGISTICS_DECISION_LEADER",
         "PRIMELOAD_CLOUD_WAREHOUSE_DECISION_LEADER",

@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS tenant_registry (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
     app_id BIGINT NOT NULL DEFAULT 0 COMMENT '应用ID',
     app_code VARCHAR(32) NOT NULL DEFAULT 'WSGM' COMMENT '应用编码',
-    parent_tenant_id BIGINT DEFAULT NULL COMMENT '父级租户ID。PMHUB 中项目可挂到公司或集团租户下',
+    parent_tenant_id BIGINT DEFAULT NULL COMMENT '父级租户ID。NEXIS 中项目可挂到公司或集团租户下',
     tenant_code VARCHAR(64) NOT NULL COMMENT '租户编码',
     tenant_name VARCHAR(128) NOT NULL COMMENT '租户名称',
     tenant_type VARCHAR(32) NOT NULL COMMENT '租户类型',

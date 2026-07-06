@@ -40,7 +40,7 @@ public class MerchantQuotationController {
     }
 
     /**
-     * 报价单列表，支持按 `pmhub` 交易对象字段筛选。
+     * 报价单列表，支持按 `nexis` 交易对象字段筛选。
      */
     @Operation(summary = "报价单分页列表", description = "支持按关键字、目标项目/工地/联系人、仓库、物流、有效期与是否过期进行分页筛选。")
     @GetMapping
@@ -51,7 +51,7 @@ public class MerchantQuotationController {
     /**
      * 查看单张报价单详情。
      */
-    @Operation(summary = "报价单详情", description = "查看报价单头信息、目标 pmhub 交易对象和报价明细。")
+    @Operation(summary = "报价单详情", description = "查看报价单头信息、目标 nexis 交易对象和报价明细。")
     @GetMapping("/{id}")
     public Result<MerchantQuotationResponse> getById(@Parameter(description = "报价单 ID", example = "66051601973043202")
                                                  @PathVariable("id") Long id,
@@ -62,7 +62,7 @@ public class MerchantQuotationController {
     /**
      * 创建报价单。
      */
-    @Operation(summary = "创建报价单", description = "面向 pmhub 交易对象创建报价单，可带计划发货仓库、物流公司和有效期。")
+    @Operation(summary = "创建报价单", description = "面向 nexis 交易对象创建报价单，可带计划发货仓库、物流公司和有效期。")
     @PostMapping
     public Result<MerchantQuotationResponse> create(@RequestBody MerchantQuotationCreateRequest request, LoginUser loginUser) {
         return Result.success(merchantQuotationService.create(request, loginUser));

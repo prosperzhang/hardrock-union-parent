@@ -7,12 +7,12 @@
 当前核心 app：
 
 - `wsgm`：集团总部内部使用的管理系统。
-- `pmhub`：面向施工企业、项目部、项目现场的项目管理 SaaS。
+- `nexis`：面向施工企业、项目部、项目现场的项目管理 SaaS。
 - `primeload-marketplace`：面向五金建材商家的商城/交易 SaaS。
 
 当前租户定位：
 
-- `pmhub` 是多租户 SaaS，当前核心模型是：一个项目就是一个租户。
+- `nexis` 是多租户 SaaS，当前核心模型是：一个项目就是一个租户。
 - `primeload-marketplace` 是多租户 SaaS，当前核心模型是：一个商家就是一个租户。
 - `wsgm` 是集团自营内部系统，可以先按总部默认组织理解，后续再扩展内部组织模型。
 
@@ -26,7 +26,7 @@
 - `infrastructure`：技术基础设施能力，例如数据库基础层、ID、缓存、文件存储、MQ。
 - `platform`：跨 app 复用的业务平台能力，例如 IAM、租户、文件、流程、日志。
 - `business`：可被多个 app 复用的业务域能力，例如项目、商家、仓储、物流。
-- `solution`：具体 app 的组装层，例如 `wsgm`、`pmhub`、`primeload-marketplace`。
+- `solution`：具体 app 的组装层，例如 `wsgm`、`nexis`、`primeload-marketplace`。
 
 推荐依赖方向：
 
@@ -71,7 +71,7 @@ solution -> business -> platform -> infrastructure -> framework
 ### 3.5 solution
 
 - `hardrock-union-solution-wsgm`：集团总部 app 组装层。
-- `hardrock-union-solution-pmhub`：PMHub app 组装层，组合 IAM、租户、项目业务能力。
+- `hardrock-union-solution-nexis`：Nexis app 组装层，组合 IAM、租户、项目业务能力。
 - `hardrock-union-solution-primeload-marketplace`：PRIMELOAD-MARKETPLACE app 组装层，组合 IAM、租户、商家业务能力。
 
 `solution-*` 应该尽量轻，主要负责 app 入口、聚合接口、看板、编排，不应该沉淀大量可复用核心业务。
@@ -82,7 +82,7 @@ solution -> business -> platform -> infrastructure -> framework
 
 核心概念：
 
-- `app`：应用系统身份，例如 `wsgm`、`pmhub`、`primeload-marketplace`，未来也可以有 `warehouse`、`logistics`。
+- `app`：应用系统身份，例如 `wsgm`、`nexis`、`primeload-marketplace`，未来也可以有 `warehouse`、`logistics`。
 - `tenant`：某个 app 下的组织、项目、商户或业务主体。
 - `user`：登录账号。用户可以通过成员关系加入多个租户。
 
@@ -103,7 +103,7 @@ solution -> business -> platform -> infrastructure -> framework
 
 当前例子：
 
-- `pmhub`：`tenant = project`，也就是项目即租户。
+- `nexis`：`tenant = project`，也就是项目即租户。
 - `primeload-marketplace`：`tenant = merchant`，也就是商家即租户。
 - `wsgm`：可以先有总部默认租户，后续再细化组织模型。
 
@@ -129,7 +129,7 @@ solution -> business -> platform -> infrastructure -> framework
 建议 app：
 
 - `WSGM`
-- `PMHUB`
+- `NEXIS`
 - `PRIMELOAD-MARKETPLACE`
 - `WAREHOUSE`
 - `LOGISTICS`
@@ -144,7 +144,7 @@ solution -> business -> platform -> infrastructure -> framework
 
 ## 6. IAM 方向
 
-`iam` 是跨 app 的身份和权限中心，不应该只为 PMHub 或 PRIMELOAD-MARKETPLACE 服务。
+`iam` 是跨 app 的身份和权限中心，不应该只为 Nexis 或 PRIMELOAD-MARKETPLACE 服务。
 
 当前方向：
 
@@ -175,7 +175,7 @@ app + username + password -> 账号登录成功
 tenant member + department role + permission -> 决定能访问什么
 ```
 
-PMHub 当前运行模型：
+Nexis 当前运行模型：
 
 - `tenant_registry`：项目主表，当前 `tenant = project`。
 - `iam_tenant_member`：项目成员关系。
@@ -183,12 +183,12 @@ PMHub 当前运行模型：
 - `iam_department_role`：部门角色目录。
 - `iam_tenant_join_request`：加入项目申请。
 
-PMHub 主流程中已经废弃：
+Nexis 主流程中已经废弃：
 
-- `pmhub_project`
-- `pmhub_project_member`
-- `pmhub_project_member_role`
-- `pmhub_project_join_request`
+- `nexis_project`
+- `nexis_project_member`
+- `nexis_project_member_role`
+- `nexis_project_join_request`
 - `iam_user_role`
 - `iam_user_department`
 
@@ -220,9 +220,9 @@ BIZ_CROSS_APP
 
 例子：
 
-- 一个用户创建了 `pmhub` 项目租户，他是决策部负责人。后续 20 个人加入这个项目后，这 21 个人可以在该项目租户内聊天、收项目通知、审批提醒和协作评论。
+- 一个用户创建了 `nexis` 项目租户，他是决策部负责人。后续 20 个人加入这个项目后，这 21 个人可以在该项目租户内聊天、收项目通知、审批提醒和协作评论。
 - 一个用户创建了 `primeload-marketplace` 商家租户，他是决策部负责人。后续 20 个人加入这个商家后，这 21 个人可以在该商家租户内聊天、收订单状态通知和物流状态通知。
-- 一个 `pmhub` 项目租户里的物资部采购员，可以和一个 `primeload-marketplace` 商家租户里的客服部客服员，围绕询价、订单、发货或售后单据发送即时消息。
+- 一个 `nexis` 项目租户里的物资部采购员，可以和一个 `primeload-marketplace` 商家租户里的客服部客服员，围绕询价、订单、发货或售后单据发送即时消息。
 
 消息中心不要写死“这是项目还是商家”，但必须保存参与方和业务上下文：
 
@@ -279,13 +279,13 @@ biz_id
 - 总部强定制能力放在 `hardrock-union-solution-wsgm`。
 - 能沉淀为通用能力的内容再抽到 `business-*`。
 
-### 8.2 PMHub
+### 8.2 Nexis
 
 定位：施工项目管理 SaaS。
 
-商业定价方向详见：[PMHub Pricing Strategy](./pmhub-pricing-strategy.md)。
+商业定价方向详见：[Nexis Pricing Strategy](./nexis-pricing-strategy.md)。
 
-公司/集团与项目层级方向详见：[PMHub Company And Project Model](./pmhub-company-project-model.md)。
+公司/集团与项目层级方向详见：[Nexis Company And Project Model](./nexis-company-project-model.md)。
 
 典型领域：
 
@@ -340,7 +340,7 @@ Merchant 第一阶段推进清单详见：[PRIMELOAD-MARKETPLACE Merchant Phase 
 
 - `warehouse` 负责仓库、库存、锁库、出库、入库、库存流水。
 - `logistics` 负责发货、运单、运输轨迹、签收、异常、作废。
-- `warehouse` 和 `logistics` 不应该写死 `primeload-marketplace`、`pmhub`、`merchant`、`project` 这类上层 app 语义。
+- `warehouse` 和 `logistics` 不应该写死 `primeload-marketplace`、`nexis`、`merchant`、`project` 这类上层 app 语义。
 - `merchant` 和 `project` 可以调用 `warehouse`、`logistics`，但不能反向依赖。
 - `merchant` 不直接改库存表。
 - `project` 不直接改物流表。
@@ -358,7 +358,7 @@ owner_tenant_id
 这样可以表达：
 
 - `merchant app + 商家租户 = 商家仓`
-- `pmhub/project app + 项目租户 = 项目仓`
+- `nexis/project app + 项目租户 = 项目仓`
 - `warehouse app + 仓储租户 = 第三方仓`
 
 推荐后续核心表方向：
@@ -451,8 +451,8 @@ warehouse -> project：项目仓库存已入库，可用于项目侧业务
 - `app_registry` 已经进入平台基础模型。
 - 租户成员关系由 `iam_tenant_member` 表达。
 - 租户内部门角色由 `iam_tenant_member_department_role` 表达。
-- `solution-pmhub` 和 `solution-primeload-marketplace` 应保持轻量，主要做 app 入口和编排。
-- PMHub 的项目身份已经向 `tenant = project` 收口。
+- `solution-nexis` 和 `solution-primeload-marketplace` 应保持轻量，主要做 app 入口和编排。
+- Nexis 的项目身份已经向 `tenant = project` 收口。
 - PRIMELOAD-MARKETPLACE 的商家身份应该继续向 `tenant = merchant` 收口。
 - `business-supply` 已拆分为 `business-warehouse` 和 `business-logistics`。
 - `business-chat` 已调整为 `platform-message`，作为跨 app 的消息中心。
@@ -464,7 +464,7 @@ warehouse -> project：项目仓库存已入库，可用于项目侧业务
 1. 继续保持 `tenant_registry` 作为 app-aware 的租户注册表。
 2. 继续保持 IAM 成员、部门、角色、权限统一落在 `platform-iam`。
 3. 让 `solution-*` 继续轻量化，只负责 app 编排和入口。
-4. 继续把 PMHub/PRIMELOAD-MARKETPLACE 中可复用的业务沉淀到 `business-*`。
+4. 继续把 Nexis/PRIMELOAD-MARKETPLACE 中可复用的业务沉淀到 `business-*`。
 5. 重构 `warehouse`，让仓库支持 `owner_app_id + owner_tenant_id`。
 6. 重构 `logistics`，让发货支持来源方和目标方。
 7. 再考虑新增独立的 `solution-warehouse` 和 `solution-logistics`。

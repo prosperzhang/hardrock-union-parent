@@ -27,7 +27,7 @@ public class IamPermissionMatrixController {
 
     @Operation(summary = "查询权限矩阵", description = "返回当前 app 的菜单权限树，以及部门 -> 角色 -> 已绑定菜单权限。只有 WSGM 权限管理员可调用。")
     @GetMapping
-    public Result<IamPermissionMatrixResponse> detail(@Parameter(description = "应用编码，例如 WSGM、PMHUB、PRIMELOAD-MARKETPLACE")
+    public Result<IamPermissionMatrixResponse> detail(@Parameter(description = "应用编码，例如 WSGM、NEXIS、PRIMELOAD-MARKETPLACE")
                                                       @PathVariable("appCode") String appCode,
                                                       LoginUser loginUser) {
         return Result.success(iamPermissionMatrixQueryService.getPermissionMatrix(appCode, loginUser));

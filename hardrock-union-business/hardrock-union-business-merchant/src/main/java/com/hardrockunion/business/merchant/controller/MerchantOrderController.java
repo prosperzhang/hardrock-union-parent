@@ -38,7 +38,7 @@ public class MerchantOrderController {
     }
 
     /**
-     * 订单列表，支持状态、时间和 `pmhub` 交易目标筛选。
+     * 订单列表，支持状态、时间和 `nexis` 交易目标筛选。
      */
     @Operation(summary = "订单分页列表", description = "支持按订单号、状态、简化履约信息、目标项目/工地/联系人和时间范围分页筛选。")
     @GetMapping
@@ -49,7 +49,7 @@ public class MerchantOrderController {
     /**
      * 订单详情。
      */
-    @Operation(summary = "订单详情", description = "查看订单头信息、pmhub 交易对象、简化履约信息和订单明细。")
+    @Operation(summary = "订单详情", description = "查看订单头信息、nexis 交易对象、简化履约信息和订单明细。")
     @GetMapping("/{id}")
     public Result<MerchantOrderResponse> getById(@Parameter(description = "订单 ID", example = "66050472395350018")
                                              @PathVariable("id") Long id,
@@ -60,7 +60,7 @@ public class MerchantOrderController {
     /**
      * 创建订单。
      */
-    @Operation(summary = "创建订单", description = "创建商城订单，绑定 pmhub 项目/工地/联系人。")
+    @Operation(summary = "创建订单", description = "创建商城订单，绑定 nexis 项目/工地/联系人。")
     @PostMapping
     public Result<MerchantOrderResponse> create(@RequestBody MerchantOrderCreateRequest request, LoginUser loginUser) {
         return Result.success(merchantOrderService.create(request, loginUser));
