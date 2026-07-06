@@ -7,6 +7,14 @@ public class TenantSummaryResponse {
 
     @Schema(description = "项目租户ID", example = "75668854082945026")
     private Long tenantId;
+    @Schema(description = "父级租户ID。PMHUB 项目可挂到公司或集团下", example = "75668854082945026")
+    private Long parentTenantId;
+    @Schema(description = "父级租户名称", example = "陕西某某建设有限公司")
+    private String parentTenantName;
+    @Schema(description = "父级租户编码", example = "PMHUB-COMPANY-ABC12345")
+    private String parentTenantCode;
+    @Schema(description = "租户类型。PMHUB 支持 GROUP、COMPANY、PROJECT", example = "PROJECT")
+    private String tenantType;
     @Schema(description = "项目租户名称", example = "张栋俊测试项目A")
     private String tenantName;
     @Schema(description = "项目租户编码", example = "PMHUB-20260423120000")
@@ -40,6 +48,38 @@ public class TenantSummaryResponse {
 
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public Long getParentTenantId() {
+        return parentTenantId;
+    }
+
+    public void setParentTenantId(Long parentTenantId) {
+        this.parentTenantId = parentTenantId;
+    }
+
+    public String getParentTenantName() {
+        return parentTenantName;
+    }
+
+    public void setParentTenantName(String parentTenantName) {
+        this.parentTenantName = parentTenantName;
+    }
+
+    public String getParentTenantCode() {
+        return parentTenantCode;
+    }
+
+    public void setParentTenantCode(String parentTenantCode) {
+        this.parentTenantCode = parentTenantCode;
+    }
+
+    public String getTenantType() {
+        return tenantType;
+    }
+
+    public void setTenantType(String tenantType) {
+        this.tenantType = tenantType;
     }
 
     public String getTenantName() {

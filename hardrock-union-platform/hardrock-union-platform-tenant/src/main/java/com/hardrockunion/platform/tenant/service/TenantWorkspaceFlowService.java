@@ -23,7 +23,11 @@ import com.hardrockunion.platform.tenant.event.TenantCreatedEvent;
 public class TenantWorkspaceFlowService {
 
     private static final String PRIMELOAD_MARKETPLACE = "PRIMELOAD-MARKETPLACE";
+    private static final String PMHUB = "PMHUB";
     private static final String SELF_OPERATED_MERCHANT = "SELF_OPERATED_MERCHANT";
+    private static final String PMHUB_GROUP = "GROUP";
+    private static final String PMHUB_COMPANY = "COMPANY";
+    private static final String PMHUB_PROJECT = "PROJECT";
 
     private final TenantRegistryService tenantRegistryService;
     private final TenantMemberFlowService tenantMemberFlowService;
@@ -51,7 +55,7 @@ public class TenantWorkspaceFlowService {
         iamRoleQueryService.ensureAppLogin(appCode, loginUser);
         return tenantRegistryService.listEnabledByApp(policy.appCode()).stream()
             .filter(tenant -> isPolicyTenant(policy, tenant))
-            .filter(tenant -> loginUser.getTenantId() == null || loginUser.getTenantId().equals(tenant.getId()))
+            .filter(tenant -> isVisibleTenant(policy, tenant, loginUser.getTenantId()))
             .map(this::toTenantRegistry)
             .toList();
     }
@@ -72,7 +76,7 @@ public class TenantWorkspaceFlowService {
         String tenantName = StringUtils.trim(request.getTenantName());
         String tenantCode = StringUtils.trimToNull(request.getTenantCode());
         String tenantSource = resolveTenantSource(policy, loginUser);
-        String tenantType = resolveTenantType(policy, loginUser);
+        String tenantType = resolveTenantType(policy, request, loginUser);
         var tenant = tenantRegistryService.createTenant(
             policy.appCode(),
             tenantType,
@@ -80,6 +84,7 @@ public class TenantWorkspaceFlowService {
             tenantCode,
             tenantName,
             tenantSource,
+            request.getParentTenantId(),
             request.getProjectAddress(),
             request.getProvinceCode(),
             request.getProvinceName(),
@@ -126,7 +131,9 @@ public class TenantWorkspaceFlowService {
             throw new BusinessException(policy.tenantLabel() + "不存在");
         }
         if (currentTenantId != null && !currentTenantId.equals(tenant.getId())) {
-            throw new BusinessException(policy.tenantLabel() + "不存在");
+            if (!isVisibleTenant(policy, tenant, currentTenantId)) {
+                throw new BusinessException(policy.tenantLabel() + "不存在");
+            }
         }
         return toTenantRegistry(tenant);
     }
@@ -142,7 +149,7 @@ public class TenantWorkspaceFlowService {
             .map(TenantRegistryResponse::getId);
         Stream<Long> visibleTenantIds = tenantRegistryService.listEnabledByApp(policy.appCode()).stream()
             .filter(tenant -> isPolicyTenant(policy, tenant))
-            .filter(tenant -> currentTenantId == null || currentTenantId.equals(tenant.getId()))
+            .filter(tenant -> isVisibleTenant(policy, tenant, currentTenantId))
             .filter(tenant -> StringUtils.containsIgnoreCase(tenant.getTenantName(), trimmedKeyword)
                 || StringUtils.containsIgnoreCase(tenant.getTenantCode(), trimmedKeyword)
                 || StringUtils.containsIgnoreCase(tenant.getManagerName(), trimmedKeyword)
@@ -159,7 +166,7 @@ public class TenantWorkspaceFlowService {
         }
         List<TenantRegistryResponse> tenants = tenantRegistryService.listEnabledByApp(policy.appCode()).stream()
             .filter(tenant -> isPolicyTenant(policy, tenant))
-            .filter(tenant -> currentTenantId == null || currentTenantId.equals(tenant.getId()))
+            .filter(tenant -> isVisibleTenant(policy, tenant, currentTenantId))
             .filter(tenant -> StringUtils.equalsIgnoreCase(tenant.getTenantCode(), trimmedKeyword)
                 || StringUtils.equalsIgnoreCase(tenant.getTenantName(), trimmedKeyword)
                 || StringUtils.containsIgnoreCase(tenant.getTenantCode(), trimmedKeyword)
@@ -197,8 +204,21 @@ public class TenantWorkspaceFlowService {
         return null;
     }
 
-    private String resolveTenantType(TenantFlowPolicy.AppTenantPolicy policy, LoginUser loginUser) {
-        return policy.tenantType();
+    private String resolveTenantType(TenantFlowPolicy.AppTenantPolicy policy, TenantCreateRequest request, LoginUser loginUser) {
+        String requestedTenantType = StringUtils.upperCase(StringUtils.trimToNull(request.getTenantType()));
+        if (requestedTenantType == null) {
+            return policy.tenantType();
+        }
+        if (!StringUtils.equalsIgnoreCase(PMHUB, policy.appCode())) {
+            if (StringUtils.equalsIgnoreCase(policy.tenantType(), requestedTenantType)) {
+                return policy.tenantType();
+            }
+            throw new BusinessException("当前 app 不支持自定义租户类型");
+        }
+        if (StringUtils.equalsAny(requestedTenantType, PMHUB_GROUP, PMHUB_COMPANY, PMHUB_PROJECT)) {
+            return requestedTenantType;
+        }
+        throw new BusinessException("PMHub tenantType 仅支持 GROUP、COMPANY、PROJECT");
     }
 
     private boolean isSameAppLogin(TenantFlowPolicy.AppTenantPolicy policy, LoginUser loginUser) {
@@ -206,6 +226,9 @@ public class TenantWorkspaceFlowService {
     }
 
     private boolean isPolicyTenant(TenantFlowPolicy.AppTenantPolicy policy, TenantRegistryResponse tenant) {
+        if (StringUtils.equalsIgnoreCase(PMHUB, policy.appCode())) {
+            return StringUtils.equalsAnyIgnoreCase(tenant.getTenantType(), PMHUB_GROUP, PMHUB_COMPANY, PMHUB_PROJECT);
+        }
         if (StringUtils.equalsIgnoreCase(policy.tenantType(), tenant.getTenantType())) {
             return true;
         }
@@ -213,9 +236,26 @@ public class TenantWorkspaceFlowService {
             && StringUtils.equalsIgnoreCase(SELF_OPERATED_MERCHANT, tenant.getTenantType());
     }
 
+    private boolean isVisibleTenant(TenantFlowPolicy.AppTenantPolicy policy, TenantRegistryResponse tenant, Long currentTenantId) {
+        if (currentTenantId == null) {
+            return true;
+        }
+        if (currentTenantId.equals(tenant.getId())) {
+            return true;
+        }
+        if (!StringUtils.equalsIgnoreCase(PMHUB, policy.appCode())) {
+            return false;
+        }
+        return currentTenantId.equals(tenant.getParentTenantId());
+    }
+
     private TenantSummaryResponse toTenantRegistry(TenantRegistryResponse tenant) {
         TenantSummaryResponse response = new TenantSummaryResponse();
         response.setTenantId(tenant.getId());
+        response.setParentTenantId(tenant.getParentTenantId());
+        response.setParentTenantName(tenant.getParentTenantName());
+        response.setParentTenantCode(tenant.getParentTenantCode());
+        response.setTenantType(tenant.getTenantType());
         response.setTenantName(tenant.getTenantName());
         response.setTenantCode(tenant.getTenantCode());
         response.setTenantSource(tenant.getTenantSource());

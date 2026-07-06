@@ -10,6 +10,8 @@ public class TenantRegistry extends BaseEntity {
 
     private String appCode;
 
+    private Long parentTenantId;
+
     private String tenantCode;
 
     private String tenantName;
@@ -52,6 +54,14 @@ public class TenantRegistry extends BaseEntity {
 
     public void setAppCode(String appCode) {
         this.appCode = appCode;
+    }
+
+    public Long getParentTenantId() {
+        return parentTenantId;
+    }
+
+    public void setParentTenantId(Long parentTenantId) {
+        this.parentTenantId = parentTenantId;
     }
 
     public String getTenantCode() {

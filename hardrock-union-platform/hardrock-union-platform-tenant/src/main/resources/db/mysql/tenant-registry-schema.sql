@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS tenant_registry (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
     app_id BIGINT NOT NULL DEFAULT 0 COMMENT '应用ID',
     app_code VARCHAR(32) NOT NULL DEFAULT 'WSGM' COMMENT '应用编码',
+    parent_tenant_id BIGINT DEFAULT NULL COMMENT '父级租户ID。PMHUB 中项目可挂到公司或集团租户下',
     tenant_code VARCHAR(64) NOT NULL COMMENT '租户编码',
     tenant_name VARCHAR(128) NOT NULL COMMENT '租户名称',
     tenant_type VARCHAR(32) NOT NULL COMMENT '租户类型',
@@ -21,5 +22,6 @@ CREATE TABLE IF NOT EXISTS tenant_registry (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     UNIQUE KEY uk_tenant_registry_app_code (app_id, tenant_code),
+    KEY idx_tenant_registry_parent (parent_tenant_id),
     UNIQUE KEY uk_tenant_registry_self_operated (self_operated_unique_key)
 ) COMMENT='租户注册表';

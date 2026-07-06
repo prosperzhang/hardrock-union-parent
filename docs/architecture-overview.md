@@ -285,6 +285,8 @@ biz_id
 
 商业定价方向详见：[PMHub Pricing Strategy](./pmhub-pricing-strategy.md)。
 
+公司/集团与项目层级方向详见：[PMHub Company And Project Model](./pmhub-company-project-model.md)。
+
 典型领域：
 
 - 项目。

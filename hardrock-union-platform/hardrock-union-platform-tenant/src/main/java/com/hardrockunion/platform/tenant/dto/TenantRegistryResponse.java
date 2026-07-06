@@ -5,6 +5,9 @@ public class TenantRegistryResponse {
     private Long id;
     private Long appId;
     private String appCode;
+    private Long parentTenantId;
+    private String parentTenantCode;
+    private String parentTenantName;
     private String tenantCode;
     private String tenantName;
     private String tenantType;
@@ -42,6 +45,30 @@ public class TenantRegistryResponse {
 
     public void setAppCode(String appCode) {
         this.appCode = appCode;
+    }
+
+    public Long getParentTenantId() {
+        return parentTenantId;
+    }
+
+    public void setParentTenantId(Long parentTenantId) {
+        this.parentTenantId = parentTenantId;
+    }
+
+    public String getParentTenantCode() {
+        return parentTenantCode;
+    }
+
+    public void setParentTenantCode(String parentTenantCode) {
+        this.parentTenantCode = parentTenantCode;
+    }
+
+    public String getParentTenantName() {
+        return parentTenantName;
+    }
+
+    public void setParentTenantName(String parentTenantName) {
+        this.parentTenantName = parentTenantName;
     }
 
     public String getTenantCode() {

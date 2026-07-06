@@ -5,6 +5,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "创建租户空间请求。")
 public class TenantCreateRequest {
 
+    @Schema(description = "租户类型。PMHUB 支持 GROUP、COMPANY、PROJECT；不传时按当前 app 默认类型创建。", example = "PROJECT")
+    private String tenantType;
+    @Schema(description = "父级租户ID。PMHUB 项目可填写所属公司或集团租户ID。", example = "75668854082945026")
+    private Long parentTenantId;
     @Schema(description = "租户空间名称。PMHUB 为项目名称，PRIMELOAD-MARKETPLACE 为商户名称。", example = "张栋俊测试项目A")
     private String tenantName;
     @Schema(description = "租户空间编码。不传时系统按 app 自动生成。", example = "PMHUB-20260423120000")
@@ -27,6 +31,22 @@ public class TenantCreateRequest {
     private String managerName;
     @Schema(description = "负责人手机号", example = "13800138000")
     private String managerPhone;
+
+    public String getTenantType() {
+        return tenantType;
+    }
+
+    public void setTenantType(String tenantType) {
+        this.tenantType = tenantType;
+    }
+
+    public Long getParentTenantId() {
+        return parentTenantId;
+    }
+
+    public void setParentTenantId(Long parentTenantId) {
+        this.parentTenantId = parentTenantId;
+    }
 
     public String getTenantName() {
         return tenantName;

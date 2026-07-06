@@ -27,6 +27,9 @@ public class TenantRegistryService {
     private static final String SELF_OPERATED_MERCHANT = "SELF_OPERATED_MERCHANT";
     private static final String PRIMELOAD_SELF_OPERATED_TENANT_CODE = "PRIMELOAD-MARKETPLACE-SELF-OPERATED";
     private static final String SELF_OPERATED_TENANT_NAME = "好料自营";
+    private static final String TENANT_TYPE_GROUP = "GROUP";
+    private static final String TENANT_TYPE_COMPANY = "COMPANY";
+    private static final String TENANT_TYPE_PROJECT = "PROJECT";
 
     private final TenantRegistryMapper tenantRegistryMapper;
     private final AppRegistryQueryService appRegistryQueryService;
@@ -43,7 +46,7 @@ public class TenantRegistryService {
     @PostConstruct
     public void init() {
         ensureRegionColumns();
-        dropSelfOperatedParentColumnsIfExists();
+        ensureHierarchyColumns();
         migrateSelfOperatedTenant();
         ensureSelfOperatedTenantUniqueIndex();
     }
@@ -222,8 +225,30 @@ public class TenantRegistryService {
                                                String districtName,
                                                String managerName,
                                                String managerPhone) {
-        return createTenant(appCode, tenantType, tenantCodePrefix, tenantCode, tenantName, null, projectAddress,
+        return createTenant(appCode, tenantType, tenantCodePrefix, tenantCode, tenantName, null, null, projectAddress,
             provinceCode, provinceName, cityCode, cityName, districtCode, districtName, managerName, managerPhone);
+    }
+
+    public TenantRegistryResponse createTenant(String appCode,
+                                               String tenantType,
+                                               String tenantCodePrefix,
+                                               String tenantCode,
+                                               String tenantName,
+                                               String tenantSource,
+                                               Long parentTenantId,
+                                               String projectAddress,
+                                               String provinceCode,
+                                               String provinceName,
+                                               String cityCode,
+                                               String cityName,
+                                               String districtCode,
+                                               String districtName,
+                                               String managerName,
+                                               String managerPhone) {
+        return createTenantInternal(appCode, tenantType, tenantCodePrefix, tenantCode, tenantName, tenantSource,
+            parentTenantId,
+            projectAddress, provinceCode, provinceName, cityCode, cityName, districtCode, districtName, managerName,
+            managerPhone);
     }
 
     public TenantRegistryResponse createTenant(String appCode,
@@ -241,7 +266,7 @@ public class TenantRegistryService {
                                                String districtName,
                                                String managerName,
                                                String managerPhone) {
-        return createTenantInternal(appCode, tenantType, tenantCodePrefix, tenantCode, tenantName, tenantSource,
+        return createTenant(appCode, tenantType, tenantCodePrefix, tenantCode, tenantName, tenantSource, null,
             projectAddress, provinceCode, provinceName, cityCode, cityName, districtCode, districtName, managerName,
             managerPhone);
     }
@@ -252,6 +277,7 @@ public class TenantRegistryService {
                                                        String tenantCode,
                                                        String tenantName,
                                                        String tenantSource,
+                                                       Long parentTenantId,
                                                        String projectAddress,
                                                        String provinceCode,
                                                        String provinceName,
@@ -262,12 +288,15 @@ public class TenantRegistryService {
                                                        String managerName,
                                                        String managerPhone) {
         ensureRegionColumns();
+        ensureHierarchyColumns();
         AppRegistry app = appRegistryQueryService.getEnabledAppByCode(appCode);
         ensureWsgmTenantCanBeCreated(app.getAppCode());
         String normalizedTenantName = StringUtils.trimToNull(tenantName);
         if (normalizedTenantName == null) {
             throw new BusinessException("tenantName 不能为空");
         }
+        String normalizedTenantType = normalizeTenantType(tenantType);
+        TenantRegistry parentTenant = validateParentTenant(app.getId(), parentTenantId, normalizedTenantType);
         String normalizedTenantSource = StringUtils.trimToNull(tenantSource);
         ensureSelfOperatedTenantCanBeCreated(app.getId(), normalizedTenantSource);
         String normalizedTenantCode = StringUtils.upperCase(StringUtils.trimToNull(tenantCode));
@@ -275,7 +304,7 @@ public class TenantRegistryService {
             normalizedTenantCode = PRIMELOAD_SELF_OPERATED_TENANT_CODE;
         }
         if (normalizedTenantCode == null) {
-            normalizedTenantCode = generateTenantCode(tenantCodePrefix, normalizedTenantName, tenantType);
+            normalizedTenantCode = generateTenantCode(tenantCodePrefix, normalizedTenantName, normalizedTenantType);
         }
         Long count = tenantRegistryMapper.selectCount(new LambdaQueryWrapper<TenantRegistry>()
             .eq(TenantRegistry::getAppId, app.getId())
@@ -288,9 +317,10 @@ public class TenantRegistryService {
         TenantRegistry tenant = new TenantRegistry();
         tenant.setAppId(app.getId());
         tenant.setAppCode(app.getAppCode());
+        tenant.setParentTenantId(parentTenant == null ? null : parentTenant.getId());
         tenant.setTenantCode(normalizedTenantCode);
         tenant.setTenantName(normalizedTenantName);
-        tenant.setTenantType(tenantType);
+        tenant.setTenantType(normalizedTenantType);
         tenant.setTenantSource(normalizedTenantSource);
         tenant.setProjectAddress(StringUtils.trimToNull(projectAddress));
         tenant.setProvinceCode(StringUtils.trimToNull(provinceCode));
@@ -305,6 +335,44 @@ public class TenantRegistryService {
         tenant.setDeleted(0);
         tenantRegistryMapper.insert(tenant);
         return toResponse(tenant);
+    }
+
+    private String normalizeTenantType(String tenantType) {
+        String normalizedTenantType = StringUtils.upperCase(StringUtils.trimToNull(tenantType));
+        if (normalizedTenantType == null) {
+            throw new BusinessException("tenantType 不能为空");
+        }
+        return normalizedTenantType;
+    }
+
+    private TenantRegistry validateParentTenant(Long appId, Long parentTenantId, String tenantType) {
+        if (parentTenantId == null) {
+            return null;
+        }
+        TenantRegistry parentTenant = tenantRegistryMapper.selectOne(new LambdaQueryWrapper<TenantRegistry>()
+            .eq(TenantRegistry::getAppId, appId)
+            .eq(TenantRegistry::getId, parentTenantId)
+            .eq(TenantRegistry::getDeleted, 0)
+            .eq(TenantRegistry::getStatus, 1)
+            .last("limit 1"));
+        if (parentTenant == null) {
+            throw new BusinessException("父级租户不存在或已停用");
+        }
+        if (parentTenant.getId().equals(parentTenant.getParentTenantId())) {
+            throw new BusinessException("父级租户层级异常");
+        }
+        if (StringUtils.equals(TENANT_TYPE_GROUP, tenantType)) {
+            throw new BusinessException("集团租户不能挂到其他租户下");
+        }
+        if (StringUtils.equals(TENANT_TYPE_COMPANY, tenantType)
+            && !StringUtils.equals(TENANT_TYPE_GROUP, parentTenant.getTenantType())) {
+            throw new BusinessException("公司租户只能挂到集团租户下");
+        }
+        if (StringUtils.equals(TENANT_TYPE_PROJECT, tenantType)
+            && !StringUtils.equalsAny(parentTenant.getTenantType(), TENANT_TYPE_GROUP, TENANT_TYPE_COMPANY)) {
+            throw new BusinessException("项目只能挂到公司或集团租户下");
+        }
+        return parentTenant;
     }
 
     private void ensureWsgmTenantId(String appCode, Long tenantId) {
@@ -348,6 +416,8 @@ public class TenantRegistryService {
         response.setId(tenant.getId());
         response.setAppId(tenant.getAppId());
         response.setAppCode(tenant.getAppCode());
+        response.setParentTenantId(tenant.getParentTenantId());
+        fillParentTenant(response, tenant.getParentTenantId());
         response.setTenantCode(tenant.getTenantCode());
         response.setTenantName(tenant.getTenantName());
         response.setTenantType(tenant.getTenantType());
@@ -363,6 +433,21 @@ public class TenantRegistryService {
         response.setManagerName(tenant.getManagerName());
         response.setManagerPhone(tenant.getManagerPhone());
         return response;
+    }
+
+    private void fillParentTenant(TenantRegistryResponse response, Long parentTenantId) {
+        if (parentTenantId == null) {
+            return;
+        }
+        TenantRegistry parentTenant = tenantRegistryMapper.selectOne(new LambdaQueryWrapper<TenantRegistry>()
+            .eq(TenantRegistry::getId, parentTenantId)
+            .eq(TenantRegistry::getDeleted, 0)
+            .last("limit 1"));
+        if (parentTenant == null) {
+            return;
+        }
+        response.setParentTenantCode(parentTenant.getTenantCode());
+        response.setParentTenantName(parentTenant.getTenantName());
     }
 
     private String generateTenantCode(String tenantCodePrefix, String tenantName, String tenantType) {
@@ -390,6 +475,11 @@ public class TenantRegistryService {
         addColumnIfMissing("city_name", "ALTER TABLE tenant_registry ADD COLUMN city_name VARCHAR(64) DEFAULT NULL COMMENT '市级行政区名称' AFTER city_code");
         addColumnIfMissing("district_code", "ALTER TABLE tenant_registry ADD COLUMN district_code VARCHAR(32) DEFAULT NULL COMMENT '区县行政区编码' AFTER city_name");
         addColumnIfMissing("district_name", "ALTER TABLE tenant_registry ADD COLUMN district_name VARCHAR(64) DEFAULT NULL COMMENT '区县行政区名称' AFTER district_code");
+    }
+
+    private void ensureHierarchyColumns() {
+        addColumnIfMissing("parent_tenant_id", "ALTER TABLE tenant_registry ADD COLUMN parent_tenant_id BIGINT DEFAULT NULL COMMENT '父级租户ID。PMHUB 中项目可挂到公司或集团租户下' AFTER app_code");
+        addIndexIfMissing("idx_tenant_registry_parent", "ALTER TABLE tenant_registry ADD INDEX idx_tenant_registry_parent (parent_tenant_id)");
     }
 
     private void addColumnIfMissing(String columnName, String alterSql) {
@@ -447,9 +537,17 @@ public class TenantRegistryService {
         }
     }
 
-    private void dropSelfOperatedParentColumnsIfExists() {
-        dropColumnIfExists("parent_tenant_id", "ALTER TABLE tenant_registry DROP COLUMN parent_tenant_id");
-        dropColumnIfExists("parent_app_code", "ALTER TABLE tenant_registry DROP COLUMN parent_app_code");
+    private void addIndexIfMissing(String indexName, String alterSql) {
+        Integer count = jdbcTemplate.queryForObject("""
+            SELECT COUNT(*)
+            FROM information_schema.STATISTICS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'tenant_registry'
+              AND INDEX_NAME = ?
+            """, Integer.class, indexName);
+        if (count == null || count == 0) {
+            jdbcTemplate.execute(alterSql);
+        }
     }
 
     private void dropColumnIfExists(String columnName, String alterSql) {
