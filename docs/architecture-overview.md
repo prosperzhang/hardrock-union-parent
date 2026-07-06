@@ -283,6 +283,8 @@ biz_id
 
 定位：施工项目管理 SaaS。
 
+商业定价方向详见：[PMHub Pricing Strategy](./pmhub-pricing-strategy.md)。
+
 典型领域：
 
 - 项目。
