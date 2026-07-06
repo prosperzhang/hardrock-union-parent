@@ -1,0 +1,41 @@
+CREATE TABLE IF NOT EXISTS iam_user (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
+    app_id BIGINT NOT NULL DEFAULT 0 COMMENT '应用ID',
+    app_code VARCHAR(32) NOT NULL DEFAULT 'WSGM' COMMENT '应用编码',
+    username VARCHAR(64) NOT NULL COMMENT '用户名',
+    password_hash VARCHAR(64) NOT NULL COMMENT '密码MD5',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态 1启用 0禁用',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '删除标记 0未删 1已删',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_iam_user_app_username (app_id, username)
+) COMMENT='IAM用户表';
+
+CREATE TABLE IF NOT EXISTS iam_user_info (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
+    app_id BIGINT NOT NULL DEFAULT 0 COMMENT '应用ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    nick_name VARCHAR(64) DEFAULT NULL COMMENT '昵称',
+    avatar_url VARCHAR(255) DEFAULT NULL COMMENT '头像地址',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '删除标记 0未删 1已删',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_iam_user_info_app_user (app_id, user_id),
+    KEY idx_iam_user_info_app_id (app_id),
+    KEY idx_iam_user_info_user_id (user_id)
+) COMMENT='IAM用户资料表';
+
+CREATE TABLE IF NOT EXISTS iam_role (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
+    app_id BIGINT NOT NULL DEFAULT 0 COMMENT '应用ID',
+    app_code VARCHAR(32) NOT NULL DEFAULT 'WSGM' COMMENT '应用编码',
+    role_code VARCHAR(64) NOT NULL COMMENT '角色编码',
+    role_name VARCHAR(64) NOT NULL COMMENT '角色名称',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态 1启用 0禁用',
+    assignable TINYINT NOT NULL DEFAULT 1 COMMENT '是否可分配 1可分配 0不可分配',
+    admin_role TINYINT NOT NULL DEFAULT 0 COMMENT '是否管理员角色 1是 0否',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '删除标记 0未删 1已删',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_iam_role_app_code (app_code, role_code)
+) COMMENT='IAM角色表';

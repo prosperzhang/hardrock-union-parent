@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.hardrockunion</groupId>
+        <artifactId>hardrock-union-solution</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>hardrock-union-solution-primeload-logistics</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.hardrockunion</groupId>
+            <artifactId>hardrock-union-framework-web</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hardrockunion</groupId>
+            <artifactId>hardrock-union-framework-security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hardrockunion</groupId>
+            <artifactId>hardrock-union-platform-tenant</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hardrockunion</groupId>
+            <artifactId>hardrock-union-business-logistics</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

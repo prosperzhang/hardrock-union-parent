@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS logistics_shipment_record (
+    id BIGINT PRIMARY KEY COMMENT '主键',
+    tenant_id BIGINT NOT NULL COMMENT '租户ID',
+    business_app_id BIGINT NOT NULL DEFAULT 0 COMMENT '业务应用ID',
+    business_app_code VARCHAR(32) NOT NULL COMMENT '业务应用编码',
+    source_type VARCHAR(64) NOT NULL COMMENT '来源单据类型',
+    source_id BIGINT NOT NULL COMMENT '来源单据ID',
+    source_no VARCHAR(64) DEFAULT NULL COMMENT '来源单号',
+    logistics_company VARCHAR(128) NOT NULL COMMENT '物流公司',
+    tracking_no VARCHAR(128) NOT NULL COMMENT '运单号',
+    shipped_at DATETIME NOT NULL COMMENT '发货时间',
+    shipping_remark VARCHAR(255) DEFAULT NULL COMMENT '发货备注',
+    shipment_status VARCHAR(32) NOT NULL DEFAULT 'SHIPPED' COMMENT '发货记录状态',
+    invalidated_at DATETIME DEFAULT NULL COMMENT '作废时间',
+    invalidated_remark VARCHAR(255) DEFAULT NULL COMMENT '作废原因',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '删除标记 0未删 1已删',
+    created_by BIGINT DEFAULT NULL COMMENT '创建人',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_logistics_shipment_source (tenant_id, source_type, source_id)
+) COMMENT='物流发货记录表';

@@ -1,0 +1,9 @@
+spring:
+  config:
+    activate:
+      on-profile: sentinel
+  data:
+    redis:
+      sentinel:
+        master: ${HRU_REDIS_SENTINEL_MASTER:mymaster}
+        nodes: ${HRU_REDIS_SENTINEL_NODES:192.168.0.106:26379,192.168.0.106:26380,192.168.0.106:26381}
