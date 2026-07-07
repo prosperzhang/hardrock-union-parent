@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS nexis_worker_entry (
+CREATE TABLE IF NOT EXISTS project_worker_entry (
     id BIGINT PRIMARY KEY COMMENT '主键',
     tenant_id BIGINT NOT NULL COMMENT '所属租户ID',
     entry_no VARCHAR(64) NOT NULL COMMENT '实名进场单号',
@@ -18,12 +18,12 @@ CREATE TABLE IF NOT EXISTS nexis_worker_entry (
     created_by BIGINT DEFAULT NULL COMMENT '创建人',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    UNIQUE KEY uk_nexis_worker_entry_no (entry_no),
-    KEY idx_nexis_worker_entry_tenant_site (tenant_id, site_id, status),
-    KEY idx_nexis_worker_entry_project (project_id),
-    KEY idx_nexis_worker_entry_company (participant_company_id),
-    KEY idx_nexis_worker_entry_scope (work_scope_id),
-    KEY idx_nexis_worker_entry_team (team_id),
-    KEY idx_nexis_worker_entry_worker (worker_id),
-    KEY idx_nexis_worker_entry_status (tenant_id, entry_status, real_name_status)
+    UNIQUE KEY uk_project_worker_entry_no (entry_no),
+    KEY idx_project_worker_entry_tenant_site (tenant_id, site_id, status),
+    KEY idx_project_worker_entry_project (project_id),
+    KEY idx_project_worker_entry_company (participant_company_id),
+    KEY idx_project_worker_entry_scope (work_scope_id),
+    KEY idx_project_worker_entry_team (team_id),
+    KEY idx_project_worker_entry_worker (worker_id),
+    KEY idx_project_worker_entry_status (tenant_id, entry_status, real_name_status)
 ) COMMENT='Nexis工人实名进场表';

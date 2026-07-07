@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS nexis_worker (
+CREATE TABLE IF NOT EXISTS project_worker (
     id BIGINT PRIMARY KEY COMMENT '主键',
     tenant_id BIGINT NOT NULL COMMENT '所属租户ID',
     project_id BIGINT NOT NULL COMMENT '项目ID',
@@ -16,10 +16,10 @@ CREATE TABLE IF NOT EXISTS nexis_worker (
     created_by BIGINT DEFAULT NULL COMMENT '创建人',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    KEY idx_nexis_worker_tenant_site (tenant_id, site_id, status),
-    KEY idx_nexis_worker_project (project_id),
-    KEY idx_nexis_worker_company (participant_company_id),
-    KEY idx_nexis_worker_scope (work_scope_id),
-    KEY idx_nexis_worker_team (team_id),
-    KEY idx_nexis_worker_name_phone (tenant_id, worker_name, worker_phone)
+    KEY idx_project_worker_tenant_site (tenant_id, site_id, status),
+    KEY idx_project_worker_project (project_id),
+    KEY idx_project_worker_company (participant_company_id),
+    KEY idx_project_worker_scope (work_scope_id),
+    KEY idx_project_worker_team (team_id),
+    KEY idx_project_worker_name_phone (tenant_id, worker_name, worker_phone)
 ) COMMENT='Nexis工人表';

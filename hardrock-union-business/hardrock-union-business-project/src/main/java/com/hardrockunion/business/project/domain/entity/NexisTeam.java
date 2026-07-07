@@ -3,7 +3,7 @@ package com.hardrockunion.business.project.domain.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.hardrockunion.infrastructure.db.entity.BaseEntity;
 
-@TableName("nexis_team")
+@TableName("project_team")
 public class NexisTeam extends BaseEntity {
 
     private Long tenantId;

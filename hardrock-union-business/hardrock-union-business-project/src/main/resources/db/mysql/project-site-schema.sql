@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS nexis_site (
+CREATE TABLE IF NOT EXISTS project_site (
     id BIGINT PRIMARY KEY COMMENT '主键',
     tenant_id BIGINT NOT NULL COMMENT '租户ID',
     site_name VARCHAR(128) NOT NULL COMMENT '工地名称',
@@ -11,5 +11,5 @@ CREATE TABLE IF NOT EXISTS nexis_site (
     created_by BIGINT DEFAULT NULL COMMENT '创建人',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    UNIQUE KEY uk_nexis_site_tenant_name (tenant_id, site_name)
+    UNIQUE KEY uk_project_site_tenant_name (tenant_id, site_name)
 ) COMMENT='Nexis工地表';

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS nexis_team (
+CREATE TABLE IF NOT EXISTS project_team (
     id BIGINT PRIMARY KEY COMMENT '主键',
     tenant_id BIGINT NOT NULL COMMENT '所属租户ID',
     project_id BIGINT NOT NULL COMMENT '项目ID',
@@ -14,9 +14,9 @@ CREATE TABLE IF NOT EXISTS nexis_team (
     created_by BIGINT DEFAULT NULL COMMENT '创建人',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    UNIQUE KEY uk_nexis_team_site_name (site_id, team_name),
-    KEY idx_nexis_team_tenant_site (tenant_id, site_id, status),
-    KEY idx_nexis_team_project (project_id),
-    KEY idx_nexis_team_company (participant_company_id),
-    KEY idx_nexis_team_scope (work_scope_id)
+    UNIQUE KEY uk_project_team_site_name (site_id, team_name),
+    KEY idx_project_team_tenant_site (tenant_id, site_id, status),
+    KEY idx_project_team_project (project_id),
+    KEY idx_project_team_company (participant_company_id),
+    KEY idx_project_team_scope (work_scope_id)
 ) COMMENT='Nexis班组表';

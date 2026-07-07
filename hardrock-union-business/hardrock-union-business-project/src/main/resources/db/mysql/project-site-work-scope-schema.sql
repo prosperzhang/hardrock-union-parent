@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS nexis_site_work_scope (
+CREATE TABLE IF NOT EXISTS project_site_work_scope (
     id BIGINT PRIMARY KEY COMMENT '主键',
     tenant_id BIGINT NOT NULL COMMENT '所属租户ID',
     project_id BIGINT NOT NULL COMMENT '项目ID',
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS nexis_site_work_scope (
     created_by BIGINT DEFAULT NULL COMMENT '创建人',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    KEY idx_nexis_site_work_scope_tenant_site (tenant_id, site_id, status),
-    KEY idx_nexis_site_work_scope_company (participant_company_id),
-    KEY idx_nexis_site_work_scope_project (project_id)
+    KEY idx_project_site_work_scope_tenant_site (tenant_id, site_id, status),
+    KEY idx_project_site_work_scope_company (participant_company_id),
+    KEY idx_project_site_work_scope_project (project_id)
 ) COMMENT='Nexis标段施工范围表';

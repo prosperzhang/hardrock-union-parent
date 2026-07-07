@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.hardrockunion.infrastructure.db.entity.BaseEntity;
 
-@TableName("nexis_site")
+@TableName("project_site")
 public class NexisSite extends BaseEntity {
 
     private Long tenantId;

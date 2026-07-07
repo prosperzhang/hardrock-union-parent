@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.hardrockunion.infrastructure.db.entity.BaseEntity;
 
-@TableName("nexis_worker_entry")
+@TableName("project_worker_entry")
 public class NexisWorkerEntry extends BaseEntity {
 
     private Long tenantId;

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS nexis_participant_company (
+CREATE TABLE IF NOT EXISTS project_participant_company (
     id BIGINT PRIMARY KEY COMMENT '主键',
     tenant_id BIGINT NOT NULL COMMENT '所属租户ID',
     bind_tenant_id BIGINT DEFAULT NULL COMMENT '绑定平台租户ID，为空表示外部单位',
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS nexis_participant_company (
     created_by BIGINT DEFAULT NULL COMMENT '创建人',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    UNIQUE KEY uk_nexis_participant_company_tenant_name (tenant_id, company_name),
-    KEY idx_nexis_participant_company_bind_tenant (bind_tenant_id),
-    KEY idx_nexis_participant_company_type (tenant_id, company_type, status)
+    UNIQUE KEY uk_project_participant_company_tenant_name (tenant_id, company_name),
+    KEY idx_project_participant_company_bind_tenant (bind_tenant_id),
+    KEY idx_project_participant_company_type (tenant_id, company_type, status)
 ) COMMENT='Nexis参建单位表';

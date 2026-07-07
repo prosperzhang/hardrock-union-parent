@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS nexis_worker_attendance (
+CREATE TABLE IF NOT EXISTS project_worker_attendance (
     id BIGINT PRIMARY KEY COMMENT '主键',
     tenant_id BIGINT NOT NULL COMMENT '所属租户ID',
     attendance_no VARCHAR(64) NOT NULL COMMENT '考勤单号',
@@ -19,10 +19,10 @@ CREATE TABLE IF NOT EXISTS nexis_worker_attendance (
     created_by BIGINT DEFAULT NULL COMMENT '创建人',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    UNIQUE KEY uk_nexis_worker_attendance_no (attendance_no),
-    UNIQUE KEY uk_nexis_worker_attendance_worker_day (tenant_id, worker_id, attendance_date),
-    KEY idx_nexis_worker_attendance_site_day (tenant_id, site_id, attendance_date),
-    KEY idx_nexis_worker_attendance_team_day (tenant_id, team_id, attendance_date),
-    KEY idx_nexis_worker_attendance_entry (entry_id),
-    KEY idx_nexis_worker_attendance_status (tenant_id, attendance_status)
+    UNIQUE KEY uk_project_worker_attendance_no (attendance_no),
+    UNIQUE KEY uk_project_worker_attendance_worker_day (tenant_id, worker_id, attendance_date),
+    KEY idx_project_worker_attendance_site_day (tenant_id, site_id, attendance_date),
+    KEY idx_project_worker_attendance_team_day (tenant_id, team_id, attendance_date),
+    KEY idx_project_worker_attendance_entry (entry_id),
+    KEY idx_project_worker_attendance_status (tenant_id, attendance_status)
 ) COMMENT='Nexis工人考勤表';
