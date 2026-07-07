@@ -251,6 +251,19 @@ public class TenantRegistryService {
             managerPhone);
     }
 
+    public TenantRegistryResponse updateParentTenant(String appCode, Long tenantId, Long parentTenantId) {
+        ensureHierarchyColumns();
+        AppRegistry app = appRegistryQueryService.getEnabledAppByCode(appCode);
+        TenantRegistry tenant = loadByAppAndId(app.getAppCode(), tenantId);
+        if (!StringUtils.equals(TENANT_TYPE_PROJECT, tenant.getTenantType())) {
+            throw new BusinessException("只有项目租户可以调整公司/集团归属");
+        }
+        TenantRegistry parentTenant = validateParentTenant(app.getId(), parentTenantId, tenant.getTenantType());
+        tenant.setParentTenantId(parentTenant == null ? null : parentTenant.getId());
+        tenantRegistryMapper.updateById(tenant);
+        return toResponse(tenant);
+    }
+
     public TenantRegistryResponse createTenant(String appCode,
                                                String tenantType,
                                                String tenantCodePrefix,

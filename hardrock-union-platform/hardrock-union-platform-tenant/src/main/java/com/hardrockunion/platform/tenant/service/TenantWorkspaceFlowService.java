@@ -1,6 +1,7 @@
 package com.hardrockunion.platform.tenant.service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,12 +12,16 @@ import org.springframework.transaction.annotation.Transactional;
 import com.hardrockunion.framework.core.exception.BusinessException;
 import com.hardrockunion.framework.security.model.LoginUser;
 import com.hardrockunion.platform.iam.dto.IamTenantMemberSwitchRequest;
+import com.hardrockunion.platform.iam.service.AppRegistryQueryService;
 import com.hardrockunion.platform.iam.service.IamAuthService;
 import com.hardrockunion.platform.iam.service.IamRoleQueryService;
+import com.hardrockunion.platform.iam.service.IamTenantMemberService;
+import com.hardrockunion.platform.tenant.dto.TenantWorkspaceAttachParentRequest;
 import com.hardrockunion.platform.tenant.dto.TenantCreateRequest;
 import com.hardrockunion.platform.tenant.dto.TenantCreateResponse;
 import com.hardrockunion.platform.tenant.dto.TenantSummaryResponse;
 import com.hardrockunion.platform.tenant.dto.TenantRegistryResponse;
+import com.hardrockunion.platform.tenant.dto.TenantWorkspaceMyResponse;
 import com.hardrockunion.platform.tenant.event.TenantCreatedEvent;
 
 @Service
@@ -33,6 +38,8 @@ public class TenantWorkspaceFlowService {
     private final TenantMemberFlowService tenantMemberFlowService;
     private final IamAuthService iamAuthService;
     private final IamRoleQueryService iamRoleQueryService;
+    private final IamTenantMemberService iamTenantMemberService;
+    private final AppRegistryQueryService appRegistryQueryService;
     private final TenantFlowPolicy tenantFlowPolicy;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -40,12 +47,16 @@ public class TenantWorkspaceFlowService {
                                       TenantMemberFlowService tenantMemberFlowService,
                                       IamAuthService iamAuthService,
                                       IamRoleQueryService iamRoleQueryService,
+                                      IamTenantMemberService iamTenantMemberService,
+                                      AppRegistryQueryService appRegistryQueryService,
                                       TenantFlowPolicy tenantFlowPolicy,
                                       ApplicationEventPublisher eventPublisher) {
         this.tenantRegistryService = tenantRegistryService;
         this.tenantMemberFlowService = tenantMemberFlowService;
         this.iamAuthService = iamAuthService;
         this.iamRoleQueryService = iamRoleQueryService;
+        this.iamTenantMemberService = iamTenantMemberService;
+        this.appRegistryQueryService = appRegistryQueryService;
         this.tenantFlowPolicy = tenantFlowPolicy;
         this.eventPublisher = eventPublisher;
     }
@@ -58,6 +69,54 @@ public class TenantWorkspaceFlowService {
             .filter(tenant -> isVisibleTenant(policy, tenant, loginUser.getTenantId()))
             .map(this::toTenantRegistry)
             .toList();
+    }
+
+    public TenantWorkspaceMyResponse listMyWorkspaces(String appCode, LoginUser loginUser) {
+        TenantFlowPolicy.AppTenantPolicy policy = ensureSupportedApp(appCode);
+        iamRoleQueryService.ensureAppLogin(appCode, loginUser);
+        if (!StringUtils.equalsIgnoreCase(NEXIS, policy.appCode())) {
+            TenantWorkspaceMyResponse response = new TenantWorkspaceMyResponse();
+            response.setIndependentProjects(list(appCode, loginUser));
+            return response;
+        }
+        Long appId = appRegistryQueryService.getEnabledAppByCode(policy.appCode()).getId();
+        Set<Long> directTenantIds = iamTenantMemberService.listActiveMembersByUser(appId, loginUser.getUserId()).stream()
+            .map(member -> member.getTenantId())
+            .collect(java.util.stream.Collectors.toSet());
+        List<TenantRegistryResponse> tenants = tenantRegistryService.listEnabledByApp(policy.appCode()).stream()
+            .filter(tenant -> isPolicyTenant(policy, tenant))
+            .toList();
+        Set<Long> organizationIds = tenants.stream()
+            .filter(tenant -> directTenantIds.contains(tenant.getId()))
+            .filter(tenant -> StringUtils.equalsAnyIgnoreCase(tenant.getTenantType(), NEXIS_GROUP, NEXIS_COMPANY))
+            .map(TenantRegistryResponse::getId)
+            .collect(java.util.stream.Collectors.toSet());
+
+        TenantWorkspaceMyResponse response = new TenantWorkspaceMyResponse();
+        response.setOrganizations(tenants.stream()
+            .filter(tenant -> directTenantIds.contains(tenant.getId()))
+            .filter(tenant -> StringUtils.equalsAnyIgnoreCase(tenant.getTenantType(), NEXIS_GROUP, NEXIS_COMPANY))
+            .map(this::toTenantRegistry)
+            .toList());
+        response.setIndependentProjects(tenants.stream()
+            .filter(tenant -> directTenantIds.contains(tenant.getId()))
+            .filter(tenant -> StringUtils.equalsIgnoreCase(tenant.getTenantType(), NEXIS_PROJECT))
+            .filter(tenant -> tenant.getParentTenantId() == null)
+            .map(this::toTenantRegistry)
+            .toList());
+        response.setJoinedProjects(tenants.stream()
+            .filter(tenant -> directTenantIds.contains(tenant.getId()))
+            .filter(tenant -> StringUtils.equalsIgnoreCase(tenant.getTenantType(), NEXIS_PROJECT))
+            .filter(tenant -> tenant.getParentTenantId() != null)
+            .map(this::toTenantRegistry)
+            .toList());
+        response.setOrganizationProjects(tenants.stream()
+            .filter(tenant -> StringUtils.equalsIgnoreCase(tenant.getTenantType(), NEXIS_PROJECT))
+            .filter(tenant -> organizationIds.contains(tenant.getParentTenantId()))
+            .filter(tenant -> !directTenantIds.contains(tenant.getId()))
+            .map(this::toTenantRegistry)
+            .toList());
+        return response;
     }
 
     public TenantSummaryResponse getById(String appCode, Long tenantId, LoginUser loginUser) {
@@ -122,6 +181,25 @@ public class TenantWorkspaceFlowService {
             response.setLogin(iamAuthService.switchCurrentUserTenant(policy.appCode(), loginUser.getUserId(), switchRequest));
         }
         return response;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public TenantSummaryResponse attachParent(String appCode,
+                                              Long projectTenantId,
+                                              TenantWorkspaceAttachParentRequest request,
+                                              LoginUser loginUser) {
+        TenantFlowPolicy.AppTenantPolicy policy = ensureSupportedApp(appCode);
+        if (!StringUtils.equalsIgnoreCase(NEXIS, policy.appCode())) {
+            throw new BusinessException("仅 NEXIS 支持项目归属调整");
+        }
+        iamRoleQueryService.ensureAppLogin(appCode, loginUser);
+        tenantMemberFlowService.ensureTenantRoleAdmin(policy.appCode(), projectTenantId, loginUser);
+        Long parentTenantId = request == null ? null : request.getParentTenantId();
+        if (parentTenantId != null) {
+            tenantMemberFlowService.ensureTenantRoleAdmin(policy.appCode(), parentTenantId, loginUser);
+        }
+        var tenant = tenantRegistryService.updateParentTenant(policy.appCode(), projectTenantId, parentTenantId);
+        return toTenantRegistry(tenant);
     }
 
     public TenantSummaryResponse loadTenantRegistry(String appCode, Long tenantId, Long currentTenantId) {
