@@ -55,6 +55,14 @@ public class NexisWorkerService {
         LambdaQueryWrapper<NexisWorker> wrapper = new LambdaQueryWrapper<NexisWorker>()
             .eq(NexisWorker::getTenantId, loginUser.getTenantId())
             .eq(NexisWorker::getDeleted, 0);
+        if (nexisAccessGuard.hasRole(loginUser, "NEXIS_TEAM_LEADER")) {
+            List<Long> leaderTeamIds = teamService.findIdsByLeader(loginUser.getTenantId(), loginUser.getUserId());
+            if (leaderTeamIds.isEmpty()) {
+                wrapper.eq(NexisWorker::getTeamId, -1L);
+            } else {
+                wrapper.in(NexisWorker::getTeamId, leaderTeamIds);
+            }
+        }
         if (query.getProjectId() != null) {
             wrapper.eq(NexisWorker::getProjectId, query.getProjectId());
         }
@@ -95,38 +103,91 @@ public class NexisWorkerService {
 
     public NexisWorkerResponse getById(Long id, LoginUser loginUser) {
         nexisAccessGuard.ensureLogin(loginUser);
-        return toResponse(loadEntity(id, loginUser.getTenantId()), loginUser.getTenantId());
+        NexisWorker worker = loadEntity(id, loginUser.getTenantId());
+        ensureCanAccessWorker(worker, loginUser);
+        return toResponse(worker, loginUser.getTenantId());
     }
 
     public NexisWorkerResponse create(NexisWorkerCreateRequest request, LoginUser loginUser) {
-        nexisAccessGuard.ensureLogin(loginUser);
-        if (request == null || request.getSiteId() == null) {
-            throw new BusinessException("siteId 不能为空");
-        }
-        if (request.getParticipantCompanyId() == null) {
-            throw new BusinessException("participantCompanyId 不能为空");
+        nexisAccessGuard.ensurePermission(loginUser, NexisPermissionCodes.WORKER_MANAGE);
+        if (request == null) {
+            throw new BusinessException("请求不能为空");
         }
         if (StringUtils.isBlank(request.getWorkerName())) {
             throw new BusinessException("workerName 不能为空");
         }
 
-        NexisSite site = siteService.loadEntity(request.getSiteId(), loginUser.getTenantId());
-        Long projectId = site.getProjectId() != null ? site.getProjectId() : request.getProjectId();
-        if (projectId == null) {
-            throw new BusinessException("标段尚未关联项目，无法创建工人");
+        NexisTeam team = null;
+        Long projectId = request.getProjectId() == null ? loginUser.getTenantId() : request.getProjectId();
+        Long siteId = request.getSiteId();
+        Long participantCompanyId = request.getParticipantCompanyId();
+        Long workScopeId = request.getWorkScopeId();
+        if (request.getTeamId() != null) {
+            team = teamService.loadEntity(request.getTeamId(), loginUser.getTenantId());
+            teamService.ensureCanAccessTeam(team, loginUser);
+            if (request.getProjectId() != null && !request.getProjectId().equals(team.getTenantId())) {
+                throw new BusinessException("班组不属于当前项目");
+            }
+            if (request.getSiteId() != null && team.getSiteId() != null && !request.getSiteId().equals(team.getSiteId())) {
+                throw new BusinessException("班组不属于当前标段");
+            }
+            if (request.getParticipantCompanyId() != null
+                && !request.getParticipantCompanyId().equals(team.getParticipantCompanyId())) {
+                throw new BusinessException("班组不属于当前参建单位");
+            }
+            if (request.getWorkScopeId() != null && team.getWorkScopeId() != null
+                && !request.getWorkScopeId().equals(team.getWorkScopeId())) {
+                throw new BusinessException("班组不属于当前施工范围");
+            }
+            projectId = team.getTenantId();
+            siteId = team.getSiteId() == null ? siteId : team.getSiteId();
+            participantCompanyId = team.getParticipantCompanyId();
+            workScopeId = team.getWorkScopeId() == null ? workScopeId : team.getWorkScopeId();
+        }
+        if (nexisAccessGuard.hasRole(loginUser, "NEXIS_TEAM_LEADER") && team == null) {
+            throw new BusinessException("班组长新增工人时必须选择自己负责的班组");
+        }
+        if (participantCompanyId == null) {
+            throw new BusinessException("participantCompanyId 不能为空");
+        }
+
+        NexisSite site = null;
+        if (siteId != null) {
+            site = siteService.loadEntity(siteId, loginUser.getTenantId());
+            if (site.getProjectId() != null) {
+                if (request.getProjectId() != null && !request.getProjectId().equals(site.getProjectId())) {
+                    throw new BusinessException("标段不属于当前项目");
+                }
+                projectId = site.getProjectId();
+            }
         }
         projectLookupService.loadEntity(projectId, loginUser.getTenantId());
-        participantCompanyService.loadEntity(request.getParticipantCompanyId(), loginUser.getTenantId());
-        Long workScopeId = normalizeWorkScopeId(request.getWorkScopeId(), loginUser.getTenantId(), site.getId(), request.getParticipantCompanyId());
-        Long teamId = normalizeTeamId(request.getTeamId(), loginUser.getTenantId(), site.getId(), request.getParticipantCompanyId(), workScopeId);
+        participantCompanyService.loadEntity(participantCompanyId, loginUser.getTenantId());
+        NexisSiteWorkScope workScope = normalizeWorkScope(
+            workScopeId,
+            loginUser.getTenantId(),
+            projectId,
+            site == null ? null : site.getId(),
+            participantCompanyId);
+        if (site == null && workScope != null) {
+            site = siteService.loadEntity(workScope.getSiteId(), loginUser.getTenantId());
+        }
+        Long normalizedTeamId = normalizeTeamId(
+            request.getTeamId(),
+            team,
+            loginUser.getTenantId(),
+            projectId,
+            site == null ? null : site.getId(),
+            participantCompanyId,
+            workScope == null ? null : workScope.getId());
 
         NexisWorker worker = new NexisWorker();
         worker.setTenantId(loginUser.getTenantId());
         worker.setProjectId(projectId);
-        worker.setSiteId(site.getId());
-        worker.setParticipantCompanyId(request.getParticipantCompanyId());
-        worker.setWorkScopeId(workScopeId);
-        worker.setTeamId(teamId);
+        worker.setSiteId(site == null ? null : site.getId());
+        worker.setParticipantCompanyId(participantCompanyId);
+        worker.setWorkScopeId(workScope == null ? null : workScope.getId());
+        worker.setTeamId(normalizedTeamId);
         worker.setWorkerName(StringUtils.trim(request.getWorkerName()));
         worker.setWorkerPhone(StringUtils.trimToNull(request.getWorkerPhone()));
         worker.setIdCardNo(StringUtils.upperCase(StringUtils.trimToNull(request.getIdCardNo())));
@@ -137,6 +198,16 @@ public class NexisWorkerService {
         worker.setCreatedBy(loginUser.getUserId());
         workerMapper.insert(worker);
         return getById(worker.getId(), loginUser);
+    }
+
+    public void ensureCanAccessWorker(NexisWorker worker, LoginUser loginUser) {
+        if (!nexisAccessGuard.hasRole(loginUser, "NEXIS_TEAM_LEADER")) {
+            return;
+        }
+        if (worker.getTeamId() == null) {
+            throw new BusinessException("班组长不能访问未分班组工人");
+        }
+        teamService.ensureCanAccessTeam(teamService.loadEntity(worker.getTeamId(), loginUser.getTenantId()), loginUser);
     }
 
     public NexisWorker loadEntity(Long id, Long tenantId) {
@@ -174,26 +245,38 @@ public class NexisWorkerService {
             .toList();
     }
 
-    private Long normalizeWorkScopeId(Long workScopeId, Long tenantId, Long siteId, Long participantCompanyId) {
+    private NexisSiteWorkScope normalizeWorkScope(Long workScopeId, Long tenantId, Long projectId, Long siteId, Long participantCompanyId) {
         if (workScopeId == null) {
             return null;
         }
         NexisSiteWorkScope workScope = siteWorkScopeService.loadEntity(workScopeId, tenantId);
-        if (!siteId.equals(workScope.getSiteId())) {
+        if (!projectId.equals(workScope.getProjectId())) {
+            throw new BusinessException("施工范围不属于当前项目");
+        }
+        if (siteId != null && !siteId.equals(workScope.getSiteId())) {
             throw new BusinessException("施工范围不属于当前标段");
         }
         if (!participantCompanyId.equals(workScope.getParticipantCompanyId())) {
             throw new BusinessException("施工范围不属于当前参建单位");
         }
-        return workScopeId;
+        return workScope;
     }
 
-    private Long normalizeTeamId(Long teamId, Long tenantId, Long siteId, Long participantCompanyId, Long workScopeId) {
+    private Long normalizeTeamId(Long teamId,
+                                 NexisTeam loadedTeam,
+                                 Long tenantId,
+                                 Long projectId,
+                                 Long siteId,
+                                 Long participantCompanyId,
+                                 Long workScopeId) {
         if (teamId == null) {
             return null;
         }
-        NexisTeam team = teamService.loadEntity(teamId, tenantId);
-        if (!siteId.equals(team.getSiteId())) {
+        NexisTeam team = loadedTeam == null ? teamService.loadEntity(teamId, tenantId) : loadedTeam;
+        if (!projectId.equals(team.getTenantId())) {
+            throw new BusinessException("班组不属于当前项目");
+        }
+        if (siteId != null && team.getSiteId() != null && !siteId.equals(team.getSiteId())) {
             throw new BusinessException("班组不属于当前标段");
         }
         if (!participantCompanyId.equals(team.getParticipantCompanyId())) {
@@ -207,7 +290,6 @@ public class NexisWorkerService {
 
     private NexisWorkerResponse toResponse(NexisWorker worker, Long tenantId) {
         NexisProject project = projectLookupService.loadEntity(worker.getProjectId(), tenantId);
-        NexisSite site = siteService.loadEntity(worker.getSiteId(), tenantId);
         NexisParticipantCompany company = participantCompanyService.loadEntity(worker.getParticipantCompanyId(), tenantId);
         NexisWorkerResponse response = new NexisWorkerResponse();
         response.setId(worker.getId());
@@ -215,7 +297,10 @@ public class NexisWorkerService {
         response.setProjectId(worker.getProjectId());
         response.setProjectName(project.getProjectName());
         response.setSiteId(worker.getSiteId());
-        response.setSiteName(site.getSiteName());
+        if (worker.getSiteId() != null) {
+            NexisSite site = siteService.loadEntity(worker.getSiteId(), tenantId);
+            response.setSiteName(site.getSiteName());
+        }
         response.setParticipantCompanyId(worker.getParticipantCompanyId());
         response.setParticipantCompanyName(company.getCompanyName());
         response.setWorkScopeId(worker.getWorkScopeId());

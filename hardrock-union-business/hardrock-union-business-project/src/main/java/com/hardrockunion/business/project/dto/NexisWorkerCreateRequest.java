@@ -5,13 +5,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "NexisWorkerCreateRequest", description = "nexis 工人创建请求")
 public class NexisWorkerCreateRequest {
 
-    @Schema(description = "项目 ID", example = "20010001")
+    @Schema(description = "项目 ID。不传时默认当前项目租户 ID；传 teamId 时可从班组继承。", example = "20010001")
     private Long projectId;
-    @Schema(description = "标段/工地 ID", example = "2001001")
+    @Schema(description = "标段/工地 ID，可为空，仅作为项目内施工位置维度；传 teamId 时可从班组继承。", example = "2001001")
     private Long siteId;
-    @Schema(description = "参建单位 ID", example = "68262140034686976")
+    @Schema(description = "参建单位 ID；传 teamId 时可从班组继承。", example = "68262140034686976")
     private Long participantCompanyId;
-    @Schema(description = "施工范围 ID，可为空", example = "68262140034686979")
+    @Schema(description = "施工范围 ID，可为空，仅作为项目内施工范围维度；传 teamId 时可从班组继承。", example = "68262140034686979")
     private Long workScopeId;
     @Schema(description = "班组 ID，可为空", example = "68270000000000001")
     private Long teamId;

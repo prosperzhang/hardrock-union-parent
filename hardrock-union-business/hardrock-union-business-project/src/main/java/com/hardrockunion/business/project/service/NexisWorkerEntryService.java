@@ -63,6 +63,11 @@ public class NexisWorkerEntryService {
         LambdaQueryWrapper<NexisWorkerEntry> wrapper = new LambdaQueryWrapper<NexisWorkerEntry>()
             .eq(NexisWorkerEntry::getTenantId, loginUser.getTenantId())
             .eq(NexisWorkerEntry::getDeleted, 0);
+        if (nexisAccessGuard.hasRole(loginUser, "NEXIS_TEAM_LEADER")) {
+            List<Long> teamIds = teamService.findIdsByLeader(loginUser.getTenantId(), loginUser.getUserId());
+            if (teamIds.isEmpty()) wrapper.eq(NexisWorkerEntry::getTeamId, -1L);
+            else wrapper.in(NexisWorkerEntry::getTeamId, teamIds);
+        }
         if (query.getProjectId() != null) {
             wrapper.eq(NexisWorkerEntry::getProjectId, query.getProjectId());
         }
@@ -116,15 +121,18 @@ public class NexisWorkerEntryService {
 
     public NexisWorkerEntryResponse getById(Long id, LoginUser loginUser) {
         nexisAccessGuard.ensureLogin(loginUser);
-        return toResponse(loadEntity(id, loginUser.getTenantId()), loginUser.getTenantId());
+        NexisWorkerEntry entry = loadEntity(id, loginUser.getTenantId());
+        ensureEntryAccess(entry, loginUser);
+        return toResponse(entry, loginUser.getTenantId());
     }
 
     public NexisWorkerEntryResponse create(NexisWorkerEntryCreateRequest request, LoginUser loginUser) {
-        nexisAccessGuard.ensureLogin(loginUser);
+        nexisAccessGuard.ensurePermission(loginUser, NexisPermissionCodes.ONBOARDING_MANAGE);
         if (request == null || request.getWorkerId() == null) {
             throw new BusinessException("workerId 不能为空");
         }
         NexisWorker worker = workerService.loadEntity(request.getWorkerId(), loginUser.getTenantId());
+        workerService.ensureCanAccessWorker(worker, loginUser);
         if (StringUtils.isBlank(worker.getIdCardNo())) {
             throw new BusinessException("工人未维护身份证号，无法办理实名进场");
         }
@@ -150,8 +158,9 @@ public class NexisWorkerEntryService {
     }
 
     public NexisWorkerEntryResponse enter(Long id, NexisWorkerEntryActionRequest request, LoginUser loginUser) {
-        nexisAccessGuard.ensureLogin(loginUser);
+        nexisAccessGuard.ensurePermission(loginUser, NexisPermissionCodes.ONBOARDING_MANAGE);
         NexisWorkerEntry entry = loadEntity(id, loginUser.getTenantId());
+        ensureEntryAccess(entry, loginUser);
         if (!NexisWorkerEntryStatus.REGISTERED.getCode().equals(entry.getEntryStatus())) {
             throw new BusinessException("当前实名进场记录不允许执行进场");
         }
@@ -163,8 +172,9 @@ public class NexisWorkerEntryService {
     }
 
     public NexisWorkerEntryResponse exit(Long id, NexisWorkerEntryActionRequest request, LoginUser loginUser) {
-        nexisAccessGuard.ensureLogin(loginUser);
+        nexisAccessGuard.ensurePermission(loginUser, NexisPermissionCodes.ONBOARDING_MANAGE);
         NexisWorkerEntry entry = loadEntity(id, loginUser.getTenantId());
+        ensureEntryAccess(entry, loginUser);
         if (!NexisWorkerEntryStatus.ENTERED.getCode().equals(entry.getEntryStatus())) {
             throw new BusinessException("当前实名进场记录不允许执行退场");
         }
@@ -187,6 +197,15 @@ public class NexisWorkerEntryService {
         return entry;
     }
 
+    public void ensureEntryAccess(NexisWorkerEntry entry, LoginUser loginUser) {
+        if (entry.getTeamId() == null && nexisAccessGuard.hasRole(loginUser, "NEXIS_TEAM_LEADER")) {
+            throw new BusinessException("班组长不能访问未分班组的进退场记录");
+        }
+        if (entry.getTeamId() != null) {
+            teamService.ensureCanAccessTeam(teamService.loadEntity(entry.getTeamId(), loginUser.getTenantId()), loginUser);
+        }
+    }
+
     private void ensureNoActiveEntry(Long workerId, Long tenantId) {
         Long count = workerEntryMapper.selectCount(new LambdaQueryWrapper<NexisWorkerEntry>()
             .eq(NexisWorkerEntry::getTenantId, tenantId)
@@ -206,7 +225,6 @@ public class NexisWorkerEntryService {
 
     private NexisWorkerEntryResponse toResponse(NexisWorkerEntry entry, Long tenantId) {
         NexisProject project = projectLookupService.loadEntity(entry.getProjectId(), tenantId);
-        NexisSite site = siteService.loadEntity(entry.getSiteId(), tenantId);
         NexisParticipantCompany company = participantCompanyService.loadEntity(entry.getParticipantCompanyId(), tenantId);
         NexisWorker worker = workerService.loadEntity(entry.getWorkerId(), tenantId);
         NexisWorkerEntryResponse response = new NexisWorkerEntryResponse();
@@ -216,7 +234,10 @@ public class NexisWorkerEntryService {
         response.setProjectId(entry.getProjectId());
         response.setProjectName(project.getProjectName());
         response.setSiteId(entry.getSiteId());
-        response.setSiteName(site.getSiteName());
+        if (entry.getSiteId() != null) {
+            NexisSite site = siteService.loadEntity(entry.getSiteId(), tenantId);
+            response.setSiteName(site.getSiteName());
+        }
         response.setParticipantCompanyId(entry.getParticipantCompanyId());
         response.setParticipantCompanyName(company.getCompanyName());
         response.setWorkScopeId(entry.getWorkScopeId());

@@ -94,7 +94,7 @@ public class NexisSiteWorkScopeService {
     }
 
     public NexisSiteWorkScopeResponse create(NexisSiteWorkScopeCreateRequest request, LoginUser loginUser) {
-        nexisAccessGuard.ensureLogin(loginUser);
+        nexisAccessGuard.ensurePermission(loginUser, NexisPermissionCodes.PROJECT_MANAGE);
         if (request == null || request.getSiteId() == null) {
             throw new BusinessException("siteId 不能为空");
         }

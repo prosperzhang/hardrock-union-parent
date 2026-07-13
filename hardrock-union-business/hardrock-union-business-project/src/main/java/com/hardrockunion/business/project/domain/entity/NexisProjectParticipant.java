@@ -7,7 +7,6 @@ import com.hardrockunion.infrastructure.db.entity.BaseEntity;
 public class NexisProjectParticipant extends BaseEntity {
 
     private Long tenantId;
-    private Long projectId;
     private Long participantCompanyId;
     private String participantRole;
     private Integer isLead;
@@ -17,8 +16,6 @@ public class NexisProjectParticipant extends BaseEntity {
 
     public Long getTenantId() { return tenantId; }
     public void setTenantId(Long tenantId) { this.tenantId = tenantId; }
-    public Long getProjectId() { return projectId; }
-    public void setProjectId(Long projectId) { this.projectId = projectId; }
     public Long getParticipantCompanyId() { return participantCompanyId; }
     public void setParticipantCompanyId(Long participantCompanyId) { this.participantCompanyId = participantCompanyId; }
     public String getParticipantRole() { return participantRole; }

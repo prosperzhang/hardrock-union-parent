@@ -12,6 +12,7 @@ public class IamDepartmentResponse {
     private String deptShortName;
     private Long parentId;
     private String deptType;
+    private String workspaceScope;
     private Integer status;
     private Integer sortNo;
     private List<String> roleCodes;
@@ -78,6 +79,14 @@ public class IamDepartmentResponse {
 
     public void setDeptType(String deptType) {
         this.deptType = deptType;
+    }
+
+    public String getWorkspaceScope() {
+        return workspaceScope;
+    }
+
+    public void setWorkspaceScope(String workspaceScope) {
+        this.workspaceScope = workspaceScope;
     }
 
     public Integer getStatus() {

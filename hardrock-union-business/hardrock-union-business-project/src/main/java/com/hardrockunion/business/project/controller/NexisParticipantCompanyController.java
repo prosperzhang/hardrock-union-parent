@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hardrockunion.business.project.dto.NexisParticipantCompanyBindRequest;
 import com.hardrockunion.business.project.dto.NexisParticipantCompanyCreateRequest;
 import com.hardrockunion.business.project.dto.NexisParticipantCompanyQueryRequest;
 import com.hardrockunion.business.project.dto.NexisParticipantCompanyResponse;
@@ -50,5 +51,22 @@ public class NexisParticipantCompanyController {
     public Result<NexisParticipantCompanyResponse> create(@RequestBody NexisParticipantCompanyCreateRequest request,
                                                          LoginUser loginUser) {
         return Result.success(participantCompanyService.create(request, loginUser));
+    }
+
+    @Operation(summary = "绑定真实 Nexis 租户", description = "把当前项目下的外部参建单位绑定到已经入驻 Nexis 的公司租户。绑定不改变历史数据归属。")
+    @PostMapping("/{id}/bind-tenant")
+    public Result<NexisParticipantCompanyResponse> bindTenant(@Parameter(description = "参建单位 ID", example = "68262140034686976")
+                                                              @PathVariable("id") Long id,
+                                                              @RequestBody NexisParticipantCompanyBindRequest request,
+                                                              LoginUser loginUser) {
+        return Result.success(participantCompanyService.bindTenant(id, request, loginUser));
+    }
+
+    @Operation(summary = "解除真实租户绑定", description = "解除参建单位与真实 Nexis 租户的绑定。历史数据仍保留在当前项目。")
+    @PostMapping("/{id}/unbind-tenant")
+    public Result<NexisParticipantCompanyResponse> unbindTenant(@Parameter(description = "参建单位 ID", example = "68262140034686976")
+                                                                @PathVariable("id") Long id,
+                                                                LoginUser loginUser) {
+        return Result.success(participantCompanyService.unbindTenant(id, loginUser));
     }
 }

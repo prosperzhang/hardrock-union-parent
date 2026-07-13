@@ -1,261 +1,292 @@
-# Nexis Pricing Strategy
+# Nexis 定价与产品版本策略
 
-## 1. Pricing Position
+## 1. 产品定价定位
 
-Nexis should not be priced as a simple project collaboration tool.
+Nexis 不应按照普通项目协作工具定价。
 
-The formal pricing position is:
+正式定价原则如下：
 
-- charge by project and company management value
-- keep field users lightweight or free where possible
-- use trials to prove the full workflow, not to create a permanent free tier
-- let advanced AI, approval, cost, archive, procurement, and multi-project capabilities drive higher plans
+- 按项目数量、公司管理价值和高级能力收费；
+- 现场施工员、班组长、收货人等一线用户尽量免费或轻量开放；
+- 体验版用于验证完整业务流程，不提供长期免费版本；
+- AI、审批、成本、档案、采购和多项目管理能力用于推动版本升级；
+- 集团基础组织模型保留，但集团空间仅按企业合同由平台代开。
 
-The old `199 / 499` level can be used only as an early pilot price. It should not become the formal public price, otherwise Nexis will be anchored too low for construction project management.
+原来的 `199 / 499` 元档位只能作为早鸟试点价，不应作为正式公开价格，否则会让市场低估 Nexis 在施工项目经营管理中的价值。
 
-## 2. Trial Plan
+## 2. 体验版
 
-### Experience Plan
+### 2.1 价格
 
-Price:
+- `0 元`
+- 试用期 `14–30 天`
 
-- `0 CNY`
-- `14-30 days`
+### 2.2 使用限制
 
-Limits:
+- 仅允许创建 1 个项目；
+- 只用于试用，不提供长期免费使用；
+- 不开放公司多项目和集团级能力。
 
-- 1 project
-- trial only, no long-term free usage
+### 2.3 包含能力
 
-Includes:
+- 项目台账；
+- 基础施工日报；
+- 基础材料需求；
+- 基础到货验收；
+- 少量 AI 识别额度。
 
-- project ledger
-- basic construction daily report
-- basic material request
-- basic arrival acceptance
-- limited AI recognition quota
+### 2.4 产品目的
 
-Purpose:
+- 让客户体验完整的项目业务流程；
+- 帮助销售演示材料需求、到货验收、施工日报和 AI 识别的价值；
+- 避免让客户形成 Nexis 是永久免费工具的认知。
 
-- let customers experience the complete project workflow
-- help sales demonstrate material request, arrival acceptance, daily report, and AI recognition value
-- avoid educating customers to expect Nexis as a free tool
+## 3. 项目版本
 
-## 3. Project Plans
+### 3.1 项目基础版
 
-### Project Basic
+价格：
 
-Price:
+- `999 元/月/项目`
+- `9999 元/年/项目`
 
-- `999 CNY / month / project`
-- `9999 CNY / year / project`
+适用客户：
 
-Target customers:
+- 小施工队；
+- 小型项目；
+- 专业分包单项目。
 
-- small construction teams
-- small projects
-- single-project professional subcontractors
+包含能力：
 
-Includes:
+- 项目台账；
+- 施工日报；
+- 材料需求单；
+- 基础审批；
+- 到货验收；
+- 送货单归档；
+- 基础材料成本台账；
+- 现场照片和附件；
+- 项目成员协同。
 
-- project ledger
-- construction daily report
-- material request
-- basic approval
-- arrival acceptance
-- delivery note archive
-- basic material cost ledger
-- site photos and attachments
-- project member collaboration
+版本定位：
 
-Position:
+- Nexis 正式的入门收费版本；
+- 替代低价档位成为公开销售的起点。
 
-- entry paid plan
-- replaces low public pricing as the formal starting plan
+### 3.2 项目专业版
 
-### Project Professional
+价格：
 
-Price:
+- `1999 元/月/项目`
+- `19999 元/年/项目`
 
-- `1999 CNY / month / project`
-- `19999 CNY / year / project`
+适用客户：
 
-Target customers:
+- Nexis 的标准付费客户；
+- 需要 AI 和项目成本可视化的项目；
+- 重视少漏材料、少扯皮、少返工、少对账和少丢单据的客户。
 
-- standard Nexis paid customers
-- projects that need AI and project cost visibility
-- customers who care about missing materials, disputes, rework, reconciliation, and delivery note loss
+包含项目基础版全部能力，并增加：
 
-Includes everything in Project Basic, plus:
+- AI 施工日报；
+- AI 材料清单识别；
+- 现场测量记录；
+- 简单工程量和材料量计算；
+- 材料需求审批；
+- 采购申请审批；
+- 到货异常审批；
+- 变更签证记录；
+- 项目成本报表；
+- 发票归档；
+- 一车好料采购入口；
+- 老板项目看板。
 
-- AI construction daily report
-- AI material list recognition
-- site measurement record
-- simple quantity and material calculation
-- material request approval
-- purchase request approval
-- arrival exception approval
-- change and site instruction record
-- project cost report
-- invoice archive
-- PRIMELOAD marketplace procurement entry
-- owner project dashboard
+版本定位：
 
-Position:
+- Nexis 主推版本；
+- 在产品价值和客户承受能力之间保持平衡。
 
-- main recommended plan
-- best balance between Nexis value and customer affordability
+### 3.3 施工管控版
 
-### Construction Control
+价格：
 
-Price:
+- `3999 元/月/项目`
+- `39999 元/年/项目`
 
-- `3999 CNY / month / project`
-- `39999 CNY / year / project`
+适用客户：
 
-Target customers:
+- 中大型项目；
+- 专业分包公司；
+- 装饰装修公司；
+- 消防项目；
+- 机电安装项目。
 
-- medium and large projects
-- professional subcontracting companies
-- decoration companies
-- fire protection projects
-- mechanical and electrical installation projects
+包含项目专业版全部能力，并增加：
 
-Includes everything in Project Professional, plus:
+- 多级审批流；
+- 复杂权限；
+- 预算与实际成本对比；
+- 变更签证审批；
+- 测量算量模板；
+- 工程量确认；
+- 材料计划；
+- 供应商对账；
+- 发票台账；
+- 付款申请；
+- 项目经营分析；
+- 数据导出；
+- 项目资料归档。
 
-- multi-level approval workflow
-- complex permission control
-- budget vs actual cost
-- change and site instruction approval
-- measurement and quantity calculation templates
-- quantity confirmation
-- material planning
-- supplier reconciliation
-- invoice ledger
-- payment request
-- project operation analysis
-- data export
-- project document archive
+版本定位：
 
-Position:
+- 从项目协作进入项目经营管理；
+- 面向管理复杂度较高的施工项目。
 
-- enters project operation management
-- no longer only project collaboration
+## 4. 公司多项目版
 
-## 4. Company Multi-Project Plans
+公司多项目版不以用户数量作为主要计费指标。
 
-The company plan should not be priced by user seat as the primary metric.
+现场施工员、班组长、收货人和基础协作人员应免费或轻量开放。Nexis 主要对以下价值收费：
 
-Field workers, foremen, receivers, and basic site participants should be free or lightly limited. Nexis should charge mainly for:
+- 管理的项目数量；
+- 公司管理层能力；
+- 公司级经营分析；
+- 审批复杂度；
+- 采购和成本数据能力。
 
-- project count
-- management-level capabilities
-- company-level analysis
-- approval complexity
-- procurement and cost data
+### 4.1 建议版本
 
-Recommended tiers:
-
-| Plan | Price | Included Projects |
+| 版本 | 月费 | 包含项目数 |
 | --- | ---: | ---: |
-| Company Standard | `6999 CNY / month` | up to 5 projects |
-| Company Professional | `12999 CNY / month` | up to 10 projects |
-| Company Flagship | `19999 CNY / month` | up to 20 projects |
+| 公司标准版 | `6999 元/月` | 5 个项目以内 |
+| 公司专业版 | `12999 元/月` | 10 个项目以内 |
+| 公司旗舰版 | `19999 元/月` | 20 个项目以内 |
 
-Yearly reference prices:
+年度参考价格：
 
-| Plan | Price |
+| 版本 | 年费 |
 | --- | ---: |
-| Company Standard | `69999 CNY / year` |
-| Company Professional | price by negotiation |
-| Company Flagship | price by negotiation |
+| 公司标准版 | `69999 元/年` |
+| 公司专业版 | 商务报价 |
+| 公司旗舰版 | 商务报价 |
 
-Includes:
+### 4.2 包含能力
 
-- multi-project management
-- owner cockpit
-- company-level cost summary
-- multi-project material procurement analysis
-- multi-project approval workflow
-- project manager performance
-- material request aggregation
-- supplier fulfillment ranking
-- unified invoice, delivery note, and acceptance archive
-- PRIMELOAD procurement data integration
+- 多项目管理；
+- 老板驾驶舱；
+- 公司级成本汇总；
+- 多项目材料采购分析；
+- 多项目审批流；
+- 项目经理绩效；
+- 材料需求汇总；
+- 供应商履约排名；
+- 发票、送货单和验收单统一归档；
+- 一车好料采购数据打通。
 
-## 5. Enterprise Plan
+### 4.3 公司空间创建规则
 
-Price:
+- 完成注册和个人资料后，用户可以自助创建公司空间；
+- 公司空间是多项目管理的标准入口；
+- 公司可以直接创建和管理下属项目；
+- 公司空间不设置上级组织，项目可以独立存在或挂到一家公司下。
 
-- `100000-500000 CNY / year` and above
-- quote by project complexity
+## 5. 企业版
 
-Target customers:
+价格：
 
-- medium and large construction enterprises
-- professional subcontracting groups
-- decoration companies
-- fire protection and mechanical/electrical companies
-- regional construction enterprises
+- `10 万–50 万元/年起`
+- 根据企业规模、实施范围和系统集成复杂度报价。
 
-Includes:
+适用客户：
 
-- multi-company support
-- multi-department support
-- multi-project support
-- complex approval workflow
-- custom forms
-- custom cost subjects
-- API
-- ERP integration
-- financial system integration
-- WeCom, DingTalk, or Feishu integration
-- AI + BIM module
-- advanced permission system
-- private deployment or dedicated deployment option
-- dedicated customer success
-- annual training
+- 中大型施工企业；
+- 专业分包集团；
+- 装饰装修公司；
+- 消防和机电公司；
+- 区域施工企业；
+- 需要集团级管理的多公司组织。
 
-Rule:
+包含能力：
 
-- enterprise plan must not be sold cheaply
-- once ERP, finance, BIM, API, or dedicated implementation is involved, pricing should be based on implementation complexity and annual account value
+- 多公司、多部门和多项目管理；
+- 集团级组织与经营驾驶舱；
+- 复杂审批流；
+- 自定义表单；
+- 自定义成本科目；
+- API；
+- ERP 对接；
+- 财务系统对接；
+- 企业微信、钉钉或飞书对接；
+- AI + BIM 模块；
+- 高级权限和数据范围；
+- 私有化或专属部署选项；
+- 专属客户成功服务；
+- 年度培训。
 
-## 6. Product Packaging Rule
+定价规则：
 
-Recommended packaging ladder:
+- 企业版不得低价销售；
+- 涉及 ERP、财务、BIM、API、私有化或专属实施时，必须按照实施复杂度和年度客户价值报价；
+- 集团能力属于企业版，不包含在体验版、项目版或普通公司版中。
+
+## 6. 集团型客户交付边界
+
+集团是公司和项目上方的正式组织节点，同时也是高度定制的企业治理空间，可能涉及：
+
+- 多法人公司治理；
+- 集团战略、投资、法务、审计和风控部门；
+- 跨公司的项目、成本、采购和经营数据口径；
+- 集团到公司、公司到项目的多级审批；
+- 跨公司授权和数据范围；
+- ERP、财务、BIM 和办公平台集成；
+- 专属实施、数据初始化和年度服务。
+
+因此集团型客户采用以下规则：
+
+1. 平台保留 `GROUP`、`COMPANY` 和 `PROJECT` 三种 Nexis 空间；
+2. 保留集团查询、集团部门、集团角色和集团到公司/项目的基础组织关系；
+3. 注册引导页只提供“创建公司”和“创建独立项目”，普通用户不能自助创建集团；
+4. 集团空间由平台运营审核企业资料和合同后代开；
+5. 集团驾驶舱、跨公司审批、战略投资、系统集成等能力按合同授权；
+6. 企业实施时需要确认法人关系、管理口径、审批边界和系统集成范围；
+7. 定制方案不得破坏现有公司和项目的业务数据隔离。
+
+## 7. 产品版本阶梯
+
+建议的产品升级路径：
 
 ```text
-Experience
-  prove workflow
+体验版
+  验证完整项目流程
 
-Project Basic
-  project collaboration and basic material control
+项目基础版
+  项目协作和基础材料管理
 
-Project Professional
-  AI + approval + cost visibility
+项目专业版
+  AI、审批和成本可视化
 
-Construction Control
-  project operation management
+施工管控版
+  项目经营管理
 
-Company Multi-Project
-  company-level management and analysis
+公司多项目版
+  公司级多项目管理和经营分析
 
-Enterprise
-  integration, customization, deployment, and service
+企业版
+  集团治理、系统集成、定制部署和实施服务
 ```
 
-The most important public plans should be:
+公开销售时最重要的版本应当是：
 
-- Project Basic as the entry paid plan
-- Project Professional as the main recommended plan
-- Company Standard as the upgrade path for multi-project construction companies
+- 项目基础版：正式入门收费版本；
+- 项目专业版：主推版本；
+- 公司标准版：多项目施工企业的升级路径；
+- 企业版：集团客户和高度定制客户的实施方案。
 
-## 7. Implementation Implications
+## 8. 技术落地要求
 
-The pricing model implies that Nexis capabilities should be tagged by plan.
+定价模型意味着 Nexis 的能力需要按照版本进行标记。
 
-Suggested internal capability groups:
+建议的内部能力编码：
 
 - `PROJECT_LEDGER`
 - `DAILY_REPORT_BASIC`
@@ -276,6 +307,8 @@ Suggested internal capability groups:
 - `CUSTOM_FORM`
 - `API_INTEGRATION`
 - `PRIVATE_DEPLOYMENT`
+- `ENTERPRISE_CUSTOMIZATION`
 
-Future permission, menu, and subscription logic should avoid hard-coding price plans directly into business services. A separate plan capability layer should decide whether a tenant can use a feature.
+后续权限、菜单和订阅逻辑不能把具体价格版本直接硬编码进业务服务。应当建立独立的“版本能力层”，由它判断某个租户是否具备某项能力。
 
+企业定制能力不能通过普通租户创建接口开启，应由独立的合同、实施和交付流程管理。

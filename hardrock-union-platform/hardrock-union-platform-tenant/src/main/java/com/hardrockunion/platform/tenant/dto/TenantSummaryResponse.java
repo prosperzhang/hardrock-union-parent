@@ -7,13 +7,13 @@ public class TenantSummaryResponse {
 
     @Schema(description = "项目租户ID", example = "75668854082945026")
     private Long tenantId;
-    @Schema(description = "父级租户ID。NEXIS 项目可挂到公司或集团下", example = "75668854082945026")
+    @Schema(description = "父级租户ID。NEXIS 项目可挂到公司下", example = "75668854082945026")
     private Long parentTenantId;
     @Schema(description = "父级租户名称", example = "陕西某某建设有限公司")
     private String parentTenantName;
     @Schema(description = "父级租户编码", example = "NEXIS-COMPANY-ABC12345")
     private String parentTenantCode;
-    @Schema(description = "租户类型。NEXIS 支持 GROUP、COMPANY、PROJECT", example = "PROJECT")
+    @Schema(description = "租户类型。NEXIS 支持 COMPANY、PROJECT", example = "PROJECT")
     private String tenantType;
     @Schema(description = "项目租户名称", example = "张栋俊测试项目A")
     private String tenantName;
@@ -39,6 +39,12 @@ public class TenantSummaryResponse {
     private String managerName;
     @Schema(description = "项目负责人手机号", example = "13800138000")
     private String managerPhone;
+    @Schema(description = "外部上级单位名称。用于 A 公司未入驻 Nexis 时记录上级单位", example = "A公司")
+    private String externalOwnerName;
+    @Schema(description = "外部上级项目名称。用于记录对方真实大项目名称", example = "星河湾一期总承包项目")
+    private String externalProjectName;
+    @Schema(description = "我的承包范围/施工段名称", example = "1#楼主体结构劳务")
+    private String contractScopeName;
     @Schema(description = "状态，1启用，0停用", example = "1")
     private Integer status;
 
@@ -176,6 +182,30 @@ public class TenantSummaryResponse {
 
     public void setManagerPhone(String managerPhone) {
         this.managerPhone = managerPhone;
+    }
+
+    public String getExternalOwnerName() {
+        return externalOwnerName;
+    }
+
+    public void setExternalOwnerName(String externalOwnerName) {
+        this.externalOwnerName = externalOwnerName;
+    }
+
+    public String getExternalProjectName() {
+        return externalProjectName;
+    }
+
+    public void setExternalProjectName(String externalProjectName) {
+        this.externalProjectName = externalProjectName;
+    }
+
+    public String getContractScopeName() {
+        return contractScopeName;
+    }
+
+    public void setContractScopeName(String contractScopeName) {
+        this.contractScopeName = contractScopeName;
     }
 
     public Integer getStatus() {

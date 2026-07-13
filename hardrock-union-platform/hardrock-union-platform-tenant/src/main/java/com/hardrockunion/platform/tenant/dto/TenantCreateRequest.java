@@ -5,9 +5,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "创建租户空间请求。")
 public class TenantCreateRequest {
 
-    @Schema(description = "租户类型。NEXIS 支持 GROUP、COMPANY、PROJECT；不传时按当前 app 默认类型创建。", example = "PROJECT")
+    @Schema(description = "租户类型。NEXIS 支持 GROUP、COMPANY、PROJECT；GROUP 仅平台管理员可创建。", example = "PROJECT")
     private String tenantType;
-    @Schema(description = "父级租户ID。NEXIS 项目可填写所属公司或集团租户ID。", example = "75668854082945026")
+    @Schema(description = "父级租户ID。公司可填写所属集团；项目可填写所属集团或公司。", example = "75668854082945026")
     private Long parentTenantId;
     @Schema(description = "租户空间名称。NEXIS 为项目名称，PRIMELOAD-MARKETPLACE 为商户名称。", example = "张栋俊测试项目A")
     private String tenantName;
@@ -31,6 +31,12 @@ public class TenantCreateRequest {
     private String managerName;
     @Schema(description = "负责人手机号", example = "13800138000")
     private String managerPhone;
+    @Schema(description = "外部上级单位名称。用于 A 公司未入驻 Nexis 时记录上级单位", example = "A公司")
+    private String externalOwnerName;
+    @Schema(description = "外部上级项目名称。用于记录对方真实大项目名称", example = "星河湾一期总承包项目")
+    private String externalProjectName;
+    @Schema(description = "我的承包范围/施工段名称", example = "1#楼主体结构劳务")
+    private String contractScopeName;
 
     public String getTenantType() {
         return tenantType;
@@ -134,5 +140,29 @@ public class TenantCreateRequest {
 
     public void setManagerPhone(String managerPhone) {
         this.managerPhone = managerPhone;
+    }
+
+    public String getExternalOwnerName() {
+        return externalOwnerName;
+    }
+
+    public void setExternalOwnerName(String externalOwnerName) {
+        this.externalOwnerName = externalOwnerName;
+    }
+
+    public String getExternalProjectName() {
+        return externalProjectName;
+    }
+
+    public void setExternalProjectName(String externalProjectName) {
+        this.externalProjectName = externalProjectName;
+    }
+
+    public String getContractScopeName() {
+        return contractScopeName;
+    }
+
+    public void setContractScopeName(String contractScopeName) {
+        this.contractScopeName = contractScopeName;
     }
 }

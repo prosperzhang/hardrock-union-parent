@@ -47,6 +47,7 @@ public class TenantRegistryService {
     public void init() {
         ensureRegionColumns();
         ensureHierarchyColumns();
+        ensureProjectExternalColumns();
         migrateSelfOperatedTenant();
         ensureSelfOperatedTenantUniqueIndex();
     }
@@ -81,7 +82,27 @@ public class TenantRegistryService {
                                                   String districtName,
                                                   String managerName,
                                                   String managerPhone) {
+        return updateBasicInfo(appCode, tenantId, tenantName, projectAddress, provinceCode, provinceName, cityCode,
+            cityName, districtCode, districtName, managerName, managerPhone, null, null, null);
+    }
+
+    public TenantRegistryResponse updateBasicInfo(String appCode,
+                                                  Long tenantId,
+                                                  String tenantName,
+                                                  String projectAddress,
+                                                  String provinceCode,
+                                                  String provinceName,
+                                                  String cityCode,
+                                                  String cityName,
+                                                  String districtCode,
+                                                  String districtName,
+                                                  String managerName,
+                                                  String managerPhone,
+                                                  String externalOwnerName,
+                                                  String externalProjectName,
+                                                  String contractScopeName) {
         ensureRegionColumns();
+        ensureProjectExternalColumns();
         TenantRegistry tenant = loadByAppAndId(appCode, tenantId);
         String normalizedTenantName = StringUtils.trimToNull(tenantName);
         if (normalizedTenantName == null) {
@@ -97,6 +118,11 @@ public class TenantRegistryService {
         tenant.setDistrictName(StringUtils.trimToNull(districtName));
         tenant.setManagerName(StringUtils.trimToNull(managerName));
         tenant.setManagerPhone(StringUtils.trimToNull(managerPhone));
+        if (externalOwnerName != null || externalProjectName != null || contractScopeName != null) {
+            tenant.setExternalOwnerName(StringUtils.trimToNull(externalOwnerName));
+            tenant.setExternalProjectName(StringUtils.trimToNull(externalProjectName));
+            tenant.setContractScopeName(StringUtils.trimToNull(contractScopeName));
+        }
         tenantRegistryMapper.updateById(tenant);
         return toResponse(tenant);
     }
@@ -248,7 +274,32 @@ public class TenantRegistryService {
         return createTenantInternal(appCode, tenantType, tenantCodePrefix, tenantCode, tenantName, tenantSource,
             parentTenantId,
             projectAddress, provinceCode, provinceName, cityCode, cityName, districtCode, districtName, managerName,
-            managerPhone);
+            managerPhone, null, null, null);
+    }
+
+    public TenantRegistryResponse createTenant(String appCode,
+                                               String tenantType,
+                                               String tenantCodePrefix,
+                                               String tenantCode,
+                                               String tenantName,
+                                               String tenantSource,
+                                               Long parentTenantId,
+                                               String projectAddress,
+                                               String provinceCode,
+                                               String provinceName,
+                                               String cityCode,
+                                               String cityName,
+                                               String districtCode,
+                                               String districtName,
+                                               String managerName,
+                                               String managerPhone,
+                                               String externalOwnerName,
+                                               String externalProjectName,
+                                               String contractScopeName) {
+        return createTenantInternal(appCode, tenantType, tenantCodePrefix, tenantCode, tenantName, tenantSource,
+            parentTenantId,
+            projectAddress, provinceCode, provinceName, cityCode, cityName, districtCode, districtName, managerName,
+            managerPhone, externalOwnerName, externalProjectName, contractScopeName);
     }
 
     public TenantRegistryResponse updateParentTenant(String appCode, Long tenantId, Long parentTenantId) {
@@ -299,9 +350,13 @@ public class TenantRegistryService {
                                                        String districtCode,
                                                        String districtName,
                                                        String managerName,
-                                                       String managerPhone) {
+                                                       String managerPhone,
+                                                       String externalOwnerName,
+                                                       String externalProjectName,
+                                                       String contractScopeName) {
         ensureRegionColumns();
         ensureHierarchyColumns();
+        ensureProjectExternalColumns();
         AppRegistry app = appRegistryQueryService.getEnabledAppByCode(appCode);
         ensureWsgmTenantCanBeCreated(app.getAppCode());
         String normalizedTenantName = StringUtils.trimToNull(tenantName);
@@ -344,6 +399,9 @@ public class TenantRegistryService {
         tenant.setDistrictName(StringUtils.trimToNull(districtName));
         tenant.setManagerName(StringUtils.trimToNull(managerName));
         tenant.setManagerPhone(StringUtils.trimToNull(managerPhone));
+        tenant.setExternalOwnerName(StringUtils.trimToNull(externalOwnerName));
+        tenant.setExternalProjectName(StringUtils.trimToNull(externalProjectName));
+        tenant.setContractScopeName(StringUtils.trimToNull(contractScopeName));
         tenant.setStatus(1);
         tenant.setDeleted(0);
         tenantRegistryMapper.insert(tenant);
@@ -445,6 +503,9 @@ public class TenantRegistryService {
         response.setDistrictName(tenant.getDistrictName());
         response.setManagerName(tenant.getManagerName());
         response.setManagerPhone(tenant.getManagerPhone());
+        response.setExternalOwnerName(tenant.getExternalOwnerName());
+        response.setExternalProjectName(tenant.getExternalProjectName());
+        response.setContractScopeName(tenant.getContractScopeName());
         return response;
     }
 
@@ -491,8 +552,14 @@ public class TenantRegistryService {
     }
 
     private void ensureHierarchyColumns() {
-        addColumnIfMissing("parent_tenant_id", "ALTER TABLE tenant_registry ADD COLUMN parent_tenant_id BIGINT DEFAULT NULL COMMENT '父级租户ID。NEXIS 中项目可挂到公司或集团租户下' AFTER app_code");
+        addColumnIfMissing("parent_tenant_id", "ALTER TABLE tenant_registry ADD COLUMN parent_tenant_id BIGINT DEFAULT NULL COMMENT '父级租户ID。NEXIS 公司可挂集团，项目可挂集团或公司' AFTER app_code");
         addIndexIfMissing("idx_tenant_registry_parent", "ALTER TABLE tenant_registry ADD INDEX idx_tenant_registry_parent (parent_tenant_id)");
+    }
+
+    private void ensureProjectExternalColumns() {
+        addColumnIfMissing("external_owner_name", "ALTER TABLE tenant_registry ADD COLUMN external_owner_name VARCHAR(128) DEFAULT NULL COMMENT '外部上级单位名称。用于A公司未入驻时记录上级单位' AFTER manager_phone");
+        addColumnIfMissing("external_project_name", "ALTER TABLE tenant_registry ADD COLUMN external_project_name VARCHAR(128) DEFAULT NULL COMMENT '外部上级项目名称。用于记录对方的大项目名称' AFTER external_owner_name");
+        addColumnIfMissing("contract_scope_name", "ALTER TABLE tenant_registry ADD COLUMN contract_scope_name VARCHAR(128) DEFAULT NULL COMMENT '我的承包范围/施工段名称' AFTER external_project_name");
     }
 
     private void addColumnIfMissing(String columnName, String alterSql) {

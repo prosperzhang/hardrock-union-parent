@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS project_worker_attendance (
     attendance_no VARCHAR(64) NOT NULL COMMENT '考勤单号',
     attendance_date DATE NOT NULL COMMENT '考勤日期',
     project_id BIGINT NOT NULL COMMENT '项目ID',
-    site_id BIGINT NOT NULL COMMENT '标段/工地ID',
+    site_id BIGINT DEFAULT NULL COMMENT '标段/工地ID，可为空',
     participant_company_id BIGINT NOT NULL COMMENT '参建单位ID',
     work_scope_id BIGINT DEFAULT NULL COMMENT '施工范围ID',
     team_id BIGINT DEFAULT NULL COMMENT '班组ID',

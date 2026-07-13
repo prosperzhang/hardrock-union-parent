@@ -96,7 +96,7 @@ public class NexisSiteParticipantService {
     }
 
     public NexisSiteParticipantResponse create(NexisSiteParticipantCreateRequest request, LoginUser loginUser) {
-        nexisAccessGuard.ensureLogin(loginUser);
+        nexisAccessGuard.ensurePermission(loginUser, NexisPermissionCodes.PARTICIPANT_MANAGE);
         if (request == null || request.getSiteId() == null) {
             throw new BusinessException("siteId 不能为空");
         }

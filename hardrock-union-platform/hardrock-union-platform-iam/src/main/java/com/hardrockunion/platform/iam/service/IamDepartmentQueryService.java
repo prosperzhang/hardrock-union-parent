@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -29,6 +30,10 @@ import com.hardrockunion.platform.iam.mapper.IamUserMapper;
 @Service
 public class IamDepartmentQueryService {
 
+    private static final String NEXIS_APP_CODE = "NEXIS";
+    private static final String SCOPE_ALL = "ALL";
+    private static final String SCOPE_ORGANIZATION = "ORGANIZATION";
+
     private final IamDepartmentMapper iamDepartmentMapper;
     private final IamDepartmentRoleOptionMapper iamDepartmentRoleOptionMapper;
     private final IamTenantDepartmentRoleService iamTenantDepartmentRoleService;
@@ -38,6 +43,7 @@ public class IamDepartmentQueryService {
     private final AppRegistryQueryService appRegistryQueryService;
     private final IamTenantMemberService iamTenantMemberService;
     private final IamUserInfoService iamUserInfoService;
+    private final JdbcTemplate jdbcTemplate;
 
     public IamDepartmentQueryService(IamDepartmentMapper iamDepartmentMapper,
                                      IamDepartmentRoleOptionMapper iamDepartmentRoleOptionMapper,
@@ -47,7 +53,8 @@ public class IamDepartmentQueryService {
                                      IamRoleQueryService iamRoleQueryService,
                                      AppRegistryQueryService appRegistryQueryService,
                                      IamTenantMemberService iamTenantMemberService,
-                                     IamUserInfoService iamUserInfoService) {
+                                     IamUserInfoService iamUserInfoService,
+                                     JdbcTemplate jdbcTemplate) {
         this.iamDepartmentMapper = iamDepartmentMapper;
         this.iamDepartmentRoleOptionMapper = iamDepartmentRoleOptionMapper;
         this.iamTenantDepartmentRoleService = iamTenantDepartmentRoleService;
@@ -57,12 +64,23 @@ public class IamDepartmentQueryService {
         this.appRegistryQueryService = appRegistryQueryService;
         this.iamTenantMemberService = iamTenantMemberService;
         this.iamUserInfoService = iamUserInfoService;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public List<IamDepartmentResponse> listDepartments(String appCode, LoginUser loginUser) {
         ensureAppLoginOrWsgmAdmin(appCode, loginUser);
-        Long appId = resolveAppId(normalizeAppCode(appCode));
-        return listDepartments(appId);
+        String normalizedAppCode = normalizeAppCode(appCode);
+        Long appId = resolveAppId(normalizedAppCode);
+        List<IamDepartmentResponse> departments = listDepartments(appId);
+        if (!StringUtils.equalsIgnoreCase(NEXIS_APP_CODE, normalizedAppCode)
+            || !StringUtils.equalsIgnoreCase(normalizedAppCode, loginUser.getAppCode())) {
+            return departments;
+        }
+        String tenantType = resolveTenantType(appId, loginUser.getTenantId());
+        return departments.stream()
+            .filter(department -> Integer.valueOf(1).equals(department.getStatus()))
+            .filter(department -> isScopeApplicable(department.getWorkspaceScope(), tenantType))
+            .toList();
     }
 
     public List<IamDepartmentResponse> listDepartments(Long appId) {
@@ -102,6 +120,29 @@ public class IamDepartmentQueryService {
             throw new BusinessException("部门不属于当前 app");
         }
         return department;
+    }
+
+    public void ensureDepartmentAssignableToTenant(String appCode, Long tenantId, IamDepartment department) {
+        if (department == null) {
+            throw new BusinessException("部门不存在");
+        }
+        if (!StringUtils.equalsIgnoreCase(NEXIS_APP_CODE, appCode)) {
+            return;
+        }
+        String tenantType = resolveTenantType(department.getAppId(), tenantId);
+        if (!isScopeApplicable(department.getWorkspaceScope(), tenantType)) {
+            throw new BusinessException("该部门不适用于当前" + tenantTypeLabel(tenantType) + "空间");
+        }
+    }
+
+    public void ensureRolesAssignableToDepartment(Long departmentId, List<IamRole> roles) {
+        List<Long> optionRoleIds = listRoleEntitiesByDepartment(
+            departmentId,
+            roles == null || roles.isEmpty() ? null : roles.getFirst().getAppId()
+        ).stream().map(IamRole::getId).toList();
+        if (roles == null || roles.isEmpty() || roles.stream().anyMatch(role -> !optionRoleIds.contains(role.getId()))) {
+            throw new BusinessException("所选角色不属于目标部门");
+        }
     }
 
     public List<IamRole> listRoleEntitiesByDepartment(Long departmentId, String appCode) {
@@ -295,6 +336,7 @@ public class IamDepartmentQueryService {
         response.setDeptShortName(department.getDeptShortName());
         response.setParentId(department.getParentId());
         response.setDeptType(department.getDeptType());
+        response.setWorkspaceScope(StringUtils.defaultIfBlank(department.getWorkspaceScope(), SCOPE_ALL));
         response.setStatus(department.getStatus());
         response.setSortNo(department.getSortNo());
         response.setRoleCodes(listRoleEntitiesByDepartment(department.getId(), department.getAppCode())
@@ -302,6 +344,39 @@ public class IamDepartmentQueryService {
             .map(IamRole::getRoleCode)
             .toList());
         return response;
+    }
+
+    private String resolveTenantType(Long appId, Long tenantId) {
+        if (tenantId == null) {
+            throw new BusinessException("当前登录态缺少租户信息");
+        }
+        List<String> tenantTypes = jdbcTemplate.queryForList("""
+            SELECT tenant_type FROM tenant_registry
+            WHERE app_id = ? AND id = ? AND deleted = 0 AND status = 1
+            LIMIT 1
+            """, String.class, appId, tenantId);
+        if (tenantTypes.isEmpty()) {
+            throw new BusinessException("当前租户不存在或已停用");
+        }
+        return StringUtils.upperCase(StringUtils.trim(tenantTypes.getFirst()));
+    }
+
+    private boolean isScopeApplicable(String workspaceScope, String tenantType) {
+        String scope = StringUtils.upperCase(StringUtils.defaultIfBlank(workspaceScope, SCOPE_ALL));
+        if (StringUtils.equals(scope, SCOPE_ALL) || StringUtils.equals(scope, tenantType)) {
+            return true;
+        }
+        return StringUtils.equals(scope, SCOPE_ORGANIZATION)
+            && StringUtils.equalsAny(tenantType, "GROUP", "COMPANY");
+    }
+
+    private String tenantTypeLabel(String tenantType) {
+        return switch (tenantType) {
+            case "GROUP" -> "集团";
+            case "COMPANY" -> "公司";
+            case "PROJECT" -> "项目";
+            default -> "当前";
+        };
     }
 
     private void ensureAppLogin(String appCode, LoginUser loginUser) {

@@ -72,6 +72,11 @@ public class NexisWorkerAttendanceService {
         LambdaQueryWrapper<NexisWorkerAttendance> wrapper = new LambdaQueryWrapper<NexisWorkerAttendance>()
             .eq(NexisWorkerAttendance::getTenantId, loginUser.getTenantId())
             .eq(NexisWorkerAttendance::getDeleted, 0);
+        if (nexisAccessGuard.hasRole(loginUser, "NEXIS_TEAM_LEADER")) {
+            List<Long> teamIds = teamService.findIdsByLeader(loginUser.getTenantId(), loginUser.getUserId());
+            if (teamIds.isEmpty()) wrapper.eq(NexisWorkerAttendance::getTeamId, -1L);
+            else wrapper.in(NexisWorkerAttendance::getTeamId, teamIds);
+        }
         if (query.getProjectId() != null) {
             wrapper.eq(NexisWorkerAttendance::getProjectId, query.getProjectId());
         }
@@ -128,15 +133,18 @@ public class NexisWorkerAttendanceService {
 
     public NexisWorkerAttendanceResponse getById(Long id, LoginUser loginUser) {
         nexisAccessGuard.ensureLogin(loginUser);
-        return toResponse(loadEntity(id, loginUser.getTenantId()), loginUser.getTenantId());
+        NexisWorkerAttendance attendance = loadEntity(id, loginUser.getTenantId());
+        ensureAttendanceAccess(attendance, loginUser);
+        return toResponse(attendance, loginUser.getTenantId());
     }
 
     public NexisWorkerAttendanceResponse checkIn(NexisWorkerAttendanceCheckInRequest request, LoginUser loginUser) {
-        nexisAccessGuard.ensureLogin(loginUser);
+        nexisAccessGuard.ensurePermission(loginUser, NexisPermissionCodes.ATTENDANCE_MANAGE);
         if (request == null || request.getEntryId() == null) {
             throw new BusinessException("entryId 不能为空");
         }
         NexisWorkerEntry entry = workerEntryService.loadEntity(request.getEntryId(), loginUser.getTenantId());
+        workerEntryService.ensureEntryAccess(entry, loginUser);
         if (!NexisWorkerEntryStatus.ENTERED.getCode().equals(entry.getEntryStatus())) {
             throw new BusinessException("当前实名进场记录不处于已进场状态，无法签到");
         }
@@ -164,8 +172,9 @@ public class NexisWorkerAttendanceService {
     }
 
     public NexisWorkerAttendanceResponse checkOut(Long id, NexisWorkerAttendanceActionRequest request, LoginUser loginUser) {
-        nexisAccessGuard.ensureLogin(loginUser);
+        nexisAccessGuard.ensurePermission(loginUser, NexisPermissionCodes.ATTENDANCE_MANAGE);
         NexisWorkerAttendance attendance = loadEntity(id, loginUser.getTenantId());
+        ensureAttendanceAccess(attendance, loginUser);
         if (!NexisWorkerAttendanceStatus.CHECKED_IN.getCode().equals(attendance.getAttendanceStatus())) {
             throw new BusinessException("当前考勤记录不允许签退");
         }
@@ -188,6 +197,16 @@ public class NexisWorkerAttendanceService {
         return attendance;
     }
 
+    private void ensureAttendanceAccess(NexisWorkerAttendance attendance, LoginUser loginUser) {
+        if (attendance.getTeamId() == null && nexisAccessGuard.hasRole(loginUser, "NEXIS_TEAM_LEADER")) {
+            throw new BusinessException("班组长不能访问未分班组考勤");
+        }
+        if (attendance.getTeamId() != null) {
+            teamService.ensureCanAccessTeam(
+                teamService.loadEntity(attendance.getTeamId(), loginUser.getTenantId()), loginUser);
+        }
+    }
+
     private void ensureNoAttendanceForToday(Long workerId, Long tenantId) {
         Long count = workerAttendanceMapper.selectCount(new LambdaQueryWrapper<NexisWorkerAttendance>()
             .eq(NexisWorkerAttendance::getTenantId, tenantId)
@@ -205,7 +224,6 @@ public class NexisWorkerAttendanceService {
 
     private NexisWorkerAttendanceResponse toResponse(NexisWorkerAttendance attendance, Long tenantId) {
         NexisProject project = projectLookupService.loadEntity(attendance.getProjectId(), tenantId);
-        NexisSite site = siteService.loadEntity(attendance.getSiteId(), tenantId);
         NexisParticipantCompany company = participantCompanyService.loadEntity(attendance.getParticipantCompanyId(), tenantId);
         NexisWorker worker = workerService.loadEntity(attendance.getWorkerId(), tenantId);
         NexisWorkerEntry entry = workerEntryService.loadEntity(attendance.getEntryId(), tenantId);
@@ -217,7 +235,10 @@ public class NexisWorkerAttendanceService {
         response.setProjectId(attendance.getProjectId());
         response.setProjectName(project.getProjectName());
         response.setSiteId(attendance.getSiteId());
-        response.setSiteName(site.getSiteName());
+        if (attendance.getSiteId() != null) {
+            NexisSite site = siteService.loadEntity(attendance.getSiteId(), tenantId);
+            response.setSiteName(site.getSiteName());
+        }
         response.setParticipantCompanyId(attendance.getParticipantCompanyId());
         response.setParticipantCompanyName(company.getCompanyName());
         response.setWorkScopeId(attendance.getWorkScopeId());

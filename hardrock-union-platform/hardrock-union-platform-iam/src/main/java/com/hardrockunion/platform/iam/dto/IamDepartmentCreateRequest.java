@@ -7,6 +7,7 @@ public class IamDepartmentCreateRequest {
     private String deptShortName;
     private Long parentId;
     private String deptType;
+    private String workspaceScope;
     private Integer status;
     private Integer sortNo;
 
@@ -48,6 +49,14 @@ public class IamDepartmentCreateRequest {
 
     public void setDeptType(String deptType) {
         this.deptType = deptType;
+    }
+
+    public String getWorkspaceScope() {
+        return workspaceScope;
+    }
+
+    public void setWorkspaceScope(String workspaceScope) {
+        this.workspaceScope = workspaceScope;
     }
 
     public Integer getStatus() {

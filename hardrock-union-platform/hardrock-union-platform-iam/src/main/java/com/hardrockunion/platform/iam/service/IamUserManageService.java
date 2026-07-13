@@ -124,6 +124,7 @@ public class IamUserManageService {
         if (roles.size() != roleCodes.size()) {
             throw new BusinessException("角色不存在或已停用");
         }
+        validateNexisAssignment(loginUser.getAppCode(), loginUser.getTenantId(), request.getDepartmentId(), roles);
 
         IamUser user = new IamUser();
         user.setAppId(appId);
@@ -165,6 +166,10 @@ public class IamUserManageService {
         if (roles.size() != roleCodes.size()) {
             throw new BusinessException("角色不存在或已停用");
         }
+        IamDepartment primaryDepartment = iamDepartmentQueryService.getPrimaryDepartmentByUser(
+            user.getId(), appId, loginUser.getTenantId());
+        validateNexisAssignment(appCode, loginUser.getTenantId(),
+            primaryDepartment == null ? null : primaryDepartment.getId(), roles);
         saveUserRoles(user, loginUser.getTenantId(), roles);
         return toResponse(user, loginUser.getTenantId());
     }
@@ -226,6 +231,24 @@ public class IamUserManageService {
             departmentId,
             roles.stream().map(IamRole::getId).toList()
         );
+    }
+
+    private void validateNexisAssignment(String appCode,
+                                         Long tenantId,
+                                         Long departmentId,
+                                         List<IamRole> roles) {
+        if (!StringUtils.equalsIgnoreCase("NEXIS", appCode)) {
+            return;
+        }
+        if (departmentId == null) {
+            throw new BusinessException("Nexis 成员必须选择当前空间的部门");
+        }
+        if (roles.stream().anyMatch(iamRoleQueryService::isAdminRole)) {
+            throw new BusinessException("空间负责人角色不能通过成员页面分配");
+        }
+        IamDepartment department = iamDepartmentQueryService.getDepartmentEntity(resolveAppId(appCode), departmentId);
+        iamDepartmentQueryService.ensureDepartmentAssignableToTenant(appCode, tenantId, department);
+        iamDepartmentQueryService.ensureRolesAssignableToDepartment(departmentId, roles);
     }
 
     private Long resolveAppId(String appCode) {

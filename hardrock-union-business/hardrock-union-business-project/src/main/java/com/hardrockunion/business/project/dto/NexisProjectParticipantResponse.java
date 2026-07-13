@@ -9,8 +9,6 @@ public class NexisProjectParticipantResponse {
     private Long id;
     @Schema(description = "所属 nexis 租户 ID", example = "2001")
     private Long tenantId;
-    @Schema(description = "项目 ID", example = "20010001")
-    private Long projectId;
     @Schema(description = "项目名称", example = "园区一期改造项目")
     private String projectName;
     @Schema(description = "参建单位 ID", example = "68262140034686976")
@@ -34,8 +32,6 @@ public class NexisProjectParticipantResponse {
     public void setId(Long id) { this.id = id; }
     public Long getTenantId() { return tenantId; }
     public void setTenantId(Long tenantId) { this.tenantId = tenantId; }
-    public Long getProjectId() { return projectId; }
-    public void setProjectId(Long projectId) { this.projectId = projectId; }
     public String getProjectName() { return projectName; }
     public void setProjectName(String projectName) { this.projectName = projectName; }
     public Long getParticipantCompanyId() { return participantCompanyId; }

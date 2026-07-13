@@ -47,7 +47,7 @@ public class NexisSiteService {
     }
 
     public NexisSiteResponse create(NexisSiteCreateRequest request, LoginUser loginUser) {
-        nexisAccessGuard.ensureLogin(loginUser);
+        nexisAccessGuard.ensurePermission(loginUser, NexisPermissionCodes.PROJECT_MANAGE);
         if (request == null || StringUtils.isBlank(request.getSiteName())) {
             throw new BusinessException("siteName 不能为空");
         }

@@ -79,12 +79,11 @@ public class TenantMemberFlowService {
         Long appId = resolveAppId(appCode);
         Long userId = loginUser.getUserId();
         iamTenantMemberService.upsertMember(appId, tenantId, userId, ACTIVE_STATUS, true, LocalDateTime.now(), null);
-        IamDepartment decisionDepartment = loadDecisionDepartment(policy);
-        List<Long> roleIds = policy.defaultAdminRoleCodes().stream()
-            .map(roleCode -> loadRoleByCode(policy.appCode(), roleCode).getId())
-            .distinct()
-            .toList();
-        iamTenantDepartmentRoleService.replaceDepartmentRoles(appCode, tenantId, userId, decisionDepartment.getId(), roleIds);
+        TenantAdminIdentity identity = resolveTenantAdminIdentity(policy, tenantId);
+        IamDepartment adminDepartment = loadDepartmentByCode(policy.appCode(), identity.departmentCode());
+        Long roleId = loadRoleByCode(policy.appCode(), identity.roleCode()).getId();
+        iamTenantDepartmentRoleService.replaceDepartmentRoles(
+            appCode, tenantId, userId, adminDepartment.getId(), List.of(roleId));
     }
 
     public IamTenantMember findActiveMember(String appCode, Long tenantId, Long userId) {
@@ -117,8 +116,9 @@ public class TenantMemberFlowService {
         List<TenantMemberDepartmentRoleRequest> assignments = normalizeAssignments(request);
         List<IamTenantDepartmentRoleService.DepartmentRoleGroup> groups = new ArrayList<>();
         for (TenantMemberDepartmentRoleRequest assignment : assignments) {
-            IamDepartment department = loadAssignableDepartment(appCode, assignment.getDepartmentId());
+            IamDepartment department = loadAssignableDepartment(appCode, tenantId, assignment.getDepartmentId());
             List<IamRole> roles = loadAssignableRoles(appCode, assignment.getRoleCodes());
+            iamDepartmentQueryService.ensureRolesAssignableToDepartment(department.getId(), roles);
             groups.add(new IamTenantDepartmentRoleService.DepartmentRoleGroup(
                 department.getId(),
                 roles.stream().map(IamRole::getId).distinct().toList()
@@ -168,18 +168,41 @@ public class TenantMemberFlowService {
     }
 
     public void ensureTenantRoleAdmin(String appCode, Long tenantId, LoginUser loginUser) {
+        if (!isTenantRoleAdmin(appCode, tenantId, loginUser)) {
+            throw new BusinessException("当前账号没有成员管理权限");
+        }
+    }
+
+    public boolean isTenantRoleAdmin(String appCode, Long tenantId, LoginUser loginUser) {
         TenantFlowPolicy.AppTenantPolicy policy = ensureSupportedApp(appCode);
+        if (loginUser == null || tenantId == null) {
+            return false;
+        }
         if (hasPlatformAdmin(loginUser)) {
-            return;
+            return true;
         }
         iamRoleQueryService.ensureAppLogin(appCode, loginUser);
-        IamTenantMember member = findActiveMember(appCode, tenantId, loginUser.getUserId());
-        if (member == null) {
-            throw new BusinessException("当前账号没有成员管理权限");
+        if (hasTenantAdminRole(appCode, tenantId, loginUser.getUserId(), policy.defaultAdminRoleCodes())) {
+            return true;
         }
-        if (listRoleCodes(appCode, tenantId, member.getUserId()).stream().noneMatch(policy.defaultAdminRoleCodes()::contains)) {
-            throw new BusinessException("当前账号没有成员管理权限");
+        if (!StringUtils.equalsIgnoreCase("NEXIS", policy.appCode())) {
+            return false;
         }
+        Long parentTenantId = tenantRegistryService.getByAppAndId(appCode, tenantId).getParentTenantId();
+        for (int depth = 0; parentTenantId != null && depth < 2; depth++) {
+            var parent = tenantRegistryService.getByAppAndId(appCode, parentTenantId);
+            String inheritedAdminRole = switch (StringUtils.upperCase(parent.getTenantType())) {
+                case "GROUP" -> "NEXIS_GROUP_ADMIN";
+                case "COMPANY" -> "NEXIS_COMPANY_ADMIN";
+                default -> null;
+            };
+            if (inheritedAdminRole != null
+                && hasTenantAdminRole(appCode, parentTenantId, loginUser.getUserId(), List.of(inheritedAdminRole))) {
+                return true;
+            }
+            parentTenantId = parent.getParentTenantId();
+        }
+        return false;
     }
 
     public TenantFlowPolicy.AppTenantPolicy ensureSupportedApp(String appCode) {
@@ -187,9 +210,21 @@ public class TenantMemberFlowService {
     }
 
     private boolean hasPlatformAdmin(LoginUser loginUser) {
+        if (!StringUtils.equalsIgnoreCase("WSGM", loginUser.getAppCode())) {
+            return false;
+        }
         return iamRoleQueryService.listRoleEntitiesByUser(loginUser.getUserId(), loginUser.getAppCode(), loginUser.getTenantId())
             .stream()
-            .anyMatch(iamRoleQueryService::isAdminRole);
+            .anyMatch(role -> StringUtils.equalsIgnoreCase("WSGM_SUPER_ADMIN", role.getRoleCode()));
+    }
+
+    private boolean hasTenantAdminRole(String appCode,
+                                       Long tenantId,
+                                       Long userId,
+                                       List<String> adminRoleCodes) {
+        IamTenantMember member = findActiveMember(appCode, tenantId, userId);
+        return member != null
+            && listRoleCodes(appCode, tenantId, userId).stream().anyMatch(adminRoleCodes::contains);
     }
 
     private Long resolveAppId(String appCode) {
@@ -204,15 +239,15 @@ public class TenantMemberFlowService {
         return member;
     }
 
-    private IamDepartment loadDecisionDepartment(TenantFlowPolicy.AppTenantPolicy policy) {
-        IamDepartment department = iamDepartmentQueryService.getDepartmentByCode(resolveAppId(policy.appCode()), policy.defaultDepartmentCode());
+    private IamDepartment loadDepartmentByCode(String appCode, String departmentCode) {
+        IamDepartment department = iamDepartmentQueryService.getDepartmentByCode(resolveAppId(appCode), departmentCode);
         if (department == null) {
-            throw new BusinessException("未找到" + policy.appCode() + "默认决策部");
+            throw new BusinessException("未找到" + appCode + "默认管理部门");
         }
         return department;
     }
 
-    private IamDepartment loadAssignableDepartment(String appCode, Long departmentId) {
+    private IamDepartment loadAssignableDepartment(String appCode, Long tenantId, Long departmentId) {
         if (departmentId == null) {
             throw new BusinessException("分配角色时必须同时指定部门");
         }
@@ -220,7 +255,24 @@ public class TenantMemberFlowService {
         if (!Integer.valueOf(1).equals(department.getStatus())) {
             throw new BusinessException("目标部门已停用");
         }
+        iamDepartmentQueryService.ensureDepartmentAssignableToTenant(appCode, tenantId, department);
         return department;
+    }
+
+    private TenantAdminIdentity resolveTenantAdminIdentity(TenantFlowPolicy.AppTenantPolicy policy, Long tenantId) {
+        if (!StringUtils.equalsIgnoreCase("NEXIS", policy.appCode())) {
+            return new TenantAdminIdentity(policy.defaultDepartmentCode(), policy.defaultAdminRoleCodes().getFirst());
+        }
+        String tenantType = tenantRegistryService.getByAppAndId(policy.appCode(), tenantId).getTenantType();
+        return switch (StringUtils.upperCase(StringUtils.trimToEmpty(tenantType))) {
+            case "GROUP" -> new TenantAdminIdentity("NEXIS_GROUP_MANAGEMENT_DEPT", "NEXIS_GROUP_ADMIN");
+            case "COMPANY" -> new TenantAdminIdentity("NEXIS_COMPANY_MANAGEMENT_DEPT", "NEXIS_COMPANY_ADMIN");
+            case "PROJECT" -> new TenantAdminIdentity("NEXIS_PROJECT_DEPT", "NEXIS_PROJECT_ADMIN");
+            default -> throw new BusinessException("不支持的 Nexis 空间类型: " + tenantType);
+        };
+    }
+
+    private record TenantAdminIdentity(String departmentCode, String roleCode) {
     }
 
     private IamRole loadRoleByCode(String appCode, String roleCode) {

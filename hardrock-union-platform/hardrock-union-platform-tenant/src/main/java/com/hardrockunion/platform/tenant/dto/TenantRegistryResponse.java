@@ -22,6 +22,9 @@ public class TenantRegistryResponse {
     private String districtName;
     private String managerName;
     private String managerPhone;
+    private String externalOwnerName;
+    private String externalProjectName;
+    private String contractScopeName;
 
     public Long getId() {
         return id;
@@ -181,5 +184,29 @@ public class TenantRegistryResponse {
 
     public void setManagerPhone(String managerPhone) {
         this.managerPhone = managerPhone;
+    }
+
+    public String getExternalOwnerName() {
+        return externalOwnerName;
+    }
+
+    public void setExternalOwnerName(String externalOwnerName) {
+        this.externalOwnerName = externalOwnerName;
+    }
+
+    public String getExternalProjectName() {
+        return externalProjectName;
+    }
+
+    public void setExternalProjectName(String externalProjectName) {
+        this.externalProjectName = externalProjectName;
+    }
+
+    public String getContractScopeName() {
+        return contractScopeName;
+    }
+
+    public void setContractScopeName(String contractScopeName) {
+        this.contractScopeName = contractScopeName;
     }
 }

@@ -11,6 +11,10 @@ public class NexisParticipantCompanyResponse {
     private Long tenantId;
     @Schema(description = "绑定的平台租户 ID；为空表示外部单位", example = "2001")
     private Long bindTenantId;
+    @Schema(description = "绑定的平台租户名称", example = "某机电安装公司")
+    private String bindTenantName;
+    @Schema(description = "绑定的平台租户类型", example = "COMPANY")
+    private String bindTenantType;
     @Schema(description = "参建单位名称", example = "甲劳务公司")
     private String companyName;
     @Schema(description = "参建单位编码", example = "LAB-JIA-001")
@@ -34,6 +38,10 @@ public class NexisParticipantCompanyResponse {
     public void setTenantId(Long tenantId) { this.tenantId = tenantId; }
     public Long getBindTenantId() { return bindTenantId; }
     public void setBindTenantId(Long bindTenantId) { this.bindTenantId = bindTenantId; }
+    public String getBindTenantName() { return bindTenantName; }
+    public void setBindTenantName(String bindTenantName) { this.bindTenantName = bindTenantName; }
+    public String getBindTenantType() { return bindTenantType; }
+    public void setBindTenantType(String bindTenantType) { this.bindTenantType = bindTenantType; }
     public String getCompanyName() { return companyName; }
     public void setCompanyName(String companyName) { this.companyName = companyName; }
     public String getCompanyCode() { return companyCode; }

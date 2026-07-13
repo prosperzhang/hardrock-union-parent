@@ -108,11 +108,13 @@ public class TenantWorkspaceFlowService {
             .filter(tenant -> directTenantIds.contains(tenant.getId()))
             .filter(tenant -> StringUtils.equalsIgnoreCase(tenant.getTenantType(), NEXIS_PROJECT))
             .filter(tenant -> tenant.getParentTenantId() != null)
+            .filter(tenant -> organizationIds.stream().noneMatch(
+                organizationId -> isVisibleTenant(policy, tenant, organizationId)))
             .map(this::toTenantRegistry)
             .toList());
         response.setOrganizationProjects(tenants.stream()
             .filter(tenant -> StringUtils.equalsIgnoreCase(tenant.getTenantType(), NEXIS_PROJECT))
-            .filter(tenant -> organizationIds.contains(tenant.getParentTenantId()))
+            .filter(tenant -> organizationIds.stream().anyMatch(organizationId -> isVisibleTenant(policy, tenant, organizationId)))
             .filter(tenant -> !directTenantIds.contains(tenant.getId()))
             .map(this::toTenantRegistry)
             .toList());
@@ -125,10 +127,30 @@ public class TenantWorkspaceFlowService {
         return loadTenantRegistry(appCode, tenantId, loginUser.getTenantId());
     }
 
+    public List<TenantSummaryResponse> searchBindableOrganizations(String appCode, String keyword, LoginUser loginUser) {
+        TenantFlowPolicy.AppTenantPolicy policy = ensureSupportedApp(appCode);
+        iamRoleQueryService.ensureAppLogin(appCode, loginUser);
+        if (!StringUtils.equalsIgnoreCase(NEXIS, policy.appCode())) {
+            throw new BusinessException("仅 NEXIS 支持参建单位绑定组织搜索");
+        }
+        String trimmedKeyword = StringUtils.trimToNull(keyword);
+        if (trimmedKeyword == null) {
+            return List.of();
+        }
+        return tenantRegistryService.listEnabledByApp(policy.appCode()).stream()
+            .filter(tenant -> StringUtils.equalsIgnoreCase(tenant.getTenantType(), NEXIS_COMPANY))
+            .filter(tenant -> StringUtils.containsIgnoreCase(tenant.getTenantName(), trimmedKeyword)
+                || StringUtils.containsIgnoreCase(tenant.getTenantCode(), trimmedKeyword)
+                || StringUtils.containsIgnoreCase(tenant.getManagerName(), trimmedKeyword)
+                || StringUtils.containsIgnoreCase(tenant.getManagerPhone(), trimmedKeyword))
+            .limit(20)
+            .map(this::toTenantRegistry)
+            .toList();
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public TenantCreateResponse create(String appCode, TenantCreateRequest request, LoginUser loginUser) {
         TenantFlowPolicy.AppTenantPolicy policy = ensureSupportedApp(appCode);
-        ensureCanCreateTenant(policy, loginUser);
         if (request == null || StringUtils.isBlank(request.getTenantName())) {
             throw new BusinessException("tenantName 不能为空");
         }
@@ -136,6 +158,10 @@ public class TenantWorkspaceFlowService {
         String tenantCode = StringUtils.trimToNull(request.getTenantCode());
         String tenantSource = resolveTenantSource(policy, loginUser);
         String tenantType = resolveTenantType(policy, request, loginUser);
+        ensureCanCreateTenant(policy, tenantType, loginUser);
+        if (request.getParentTenantId() != null) {
+            tenantMemberFlowService.ensureTenantRoleAdmin(policy.appCode(), request.getParentTenantId(), loginUser);
+        }
         var tenant = tenantRegistryService.createTenant(
             policy.appCode(),
             tenantType,
@@ -152,7 +178,10 @@ public class TenantWorkspaceFlowService {
             request.getDistrictCode(),
             request.getDistrictName(),
             request.getManagerName(),
-            request.getManagerPhone()
+            request.getManagerPhone(),
+            request.getExternalOwnerName(),
+            request.getExternalProjectName(),
+            request.getContractScopeName()
         );
         tenantMemberFlowService.createTenantAdminMember(policy.appCode(), tenant.getId(), loginUser);
         eventPublisher.publishEvent(new TenantCreatedEvent(
@@ -270,8 +299,18 @@ public class TenantWorkspaceFlowService {
         iamRoleQueryService.ensureAppLogin(loginUser.getAppCode(), loginUser);
     }
 
-    private void ensureCanCreateTenant(TenantFlowPolicy.AppTenantPolicy policy, LoginUser loginUser) {
+    private void ensureCanCreateTenant(TenantFlowPolicy.AppTenantPolicy policy,
+                                       String tenantType,
+                                       LoginUser loginUser) {
         ensureAuthenticated(loginUser);
+        if (StringUtils.equalsIgnoreCase(NEXIS, policy.appCode())
+            && StringUtils.equalsIgnoreCase(NEXIS_GROUP, tenantType)) {
+            if (!StringUtils.equalsIgnoreCase("WSGM", loginUser.getAppCode())) {
+                throw new BusinessException("集团空间暂不开放自助创建，请联系平台开通");
+            }
+            iamRoleQueryService.ensureWsgmRoleAdmin(loginUser);
+            return;
+        }
         if (isSameAppLogin(policy, loginUser)) {
             return;
         }
@@ -296,7 +335,7 @@ public class TenantWorkspaceFlowService {
         if (StringUtils.equalsAny(requestedTenantType, NEXIS_GROUP, NEXIS_COMPANY, NEXIS_PROJECT)) {
             return requestedTenantType;
         }
-        throw new BusinessException("Nexis tenantType 仅支持 GROUP、COMPANY、PROJECT");
+        throw new BusinessException("Nexis 自助创建仅支持 COMPANY、PROJECT");
     }
 
     private boolean isSameAppLogin(TenantFlowPolicy.AppTenantPolicy policy, LoginUser loginUser) {
@@ -324,7 +363,16 @@ public class TenantWorkspaceFlowService {
         if (!StringUtils.equalsIgnoreCase(NEXIS, policy.appCode())) {
             return false;
         }
-        return currentTenantId.equals(tenant.getParentTenantId());
+        if (currentTenantId.equals(tenant.getParentTenantId())) {
+            return true;
+        }
+        if (!StringUtils.equalsIgnoreCase(NEXIS_PROJECT, tenant.getTenantType())
+            || tenant.getParentTenantId() == null) {
+            return false;
+        }
+        TenantRegistryResponse parent = tenantRegistryService.getByAppAndId(
+            policy.appCode(), tenant.getParentTenantId());
+        return currentTenantId.equals(parent.getParentTenantId());
     }
 
     private TenantSummaryResponse toTenantRegistry(TenantRegistryResponse tenant) {
@@ -346,6 +394,9 @@ public class TenantWorkspaceFlowService {
         response.setDistrictName(tenant.getDistrictName());
         response.setManagerName(tenant.getManagerName());
         response.setManagerPhone(tenant.getManagerPhone());
+        response.setExternalOwnerName(tenant.getExternalOwnerName());
+        response.setExternalProjectName(tenant.getExternalProjectName());
+        response.setContractScopeName(tenant.getContractScopeName());
         response.setStatus(tenant.getStatus());
         return response;
     }

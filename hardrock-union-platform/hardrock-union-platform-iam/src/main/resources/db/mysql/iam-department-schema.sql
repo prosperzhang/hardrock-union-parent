@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS iam_department (
     dept_short_name VARCHAR(32) NULL COMMENT '部门简称',
     parent_id BIGINT NOT NULL DEFAULT 0 COMMENT '上级部门ID',
     dept_type VARCHAR(32) NOT NULL DEFAULT 'GENERAL' COMMENT '部门类型',
+    workspace_scope VARCHAR(32) NOT NULL DEFAULT 'ALL' COMMENT '适用空间：ALL/GROUP/COMPANY/ORGANIZATION/PROJECT',
     status TINYINT NOT NULL DEFAULT 1 COMMENT '状态 1启用 0禁用',
     sort_no INT NOT NULL DEFAULT 0 COMMENT '排序号',
     deleted TINYINT NOT NULL DEFAULT 0 COMMENT '删除标记 0未删 1已删',
@@ -15,6 +16,10 @@ CREATE TABLE IF NOT EXISTS iam_department (
     UNIQUE KEY uk_iam_department_app_code (app_id, dept_code),
     KEY idx_iam_department_app_parent (app_id, parent_id)
 ) COMMENT='IAM部门表';
+
+ALTER TABLE iam_department
+    ADD COLUMN IF NOT EXISTS workspace_scope VARCHAR(32) NOT NULL DEFAULT 'ALL'
+    COMMENT '适用空间：ALL/GROUP/COMPANY/ORGANIZATION/PROJECT' AFTER dept_type;
 
 CREATE TABLE IF NOT EXISTS iam_department_role_option (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',

@@ -9,9 +9,12 @@ public final class NexisPermissionCodes {
 
     public static final String PROJECT_MANAGE = "NEXIS_PROJECT_MANAGE";
     public static final String PROJECT_MEMBER_MANAGE = "NEXIS_PROJECT_MEMBER_MANAGE";
+    public static final String PARTICIPANT_MANAGE = "NEXIS_PARTICIPANT_MANAGE";
+    public static final String TEAM_MANAGE = "NEXIS_TEAM_MANAGE";
     public static final String WORKER_MANAGE = "NEXIS_WORKER_MANAGE";
     public static final String ATTENDANCE_MANAGE = "NEXIS_ATTENDANCE_MANAGE";
     public static final String ONBOARDING_MANAGE = "NEXIS_ONBOARDING_MANAGE";
+    public static final String MATERIAL_MANAGE = "NEXIS_MATERIAL_MANAGE";
 
     private NexisPermissionCodes() {
     }

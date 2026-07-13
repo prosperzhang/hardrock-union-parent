@@ -27,8 +27,12 @@ public class TenantFlowPolicy {
                 "PROJECT",
                 "项目",
                 "创建项目或加入项目",
-                "NEXIS_DECISION_DEPT",
-                List.of("NEXIS_DECISION_LEADER"),
+                "NEXIS_PROJECT_DEPT",
+                List.of(
+                    "NEXIS_GROUP_ADMIN",
+                    "NEXIS_COMPANY_ADMIN",
+                    "NEXIS_PROJECT_ADMIN"
+                ),
                 "NEXIS"
             );
             case "PRIMELOAD-MARKETPLACE" -> new AppTenantPolicy(

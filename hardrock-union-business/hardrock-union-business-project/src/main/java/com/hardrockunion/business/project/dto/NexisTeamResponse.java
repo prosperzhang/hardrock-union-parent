@@ -9,8 +9,6 @@ public class NexisTeamResponse {
     private Long id;
     @Schema(description = "所属 nexis 租户 ID", example = "2001")
     private Long tenantId;
-    @Schema(description = "项目 ID", example = "20010001")
-    private Long projectId;
     @Schema(description = "项目名称", example = "园区一期改造项目")
     private String projectName;
     @Schema(description = "标段/工地 ID", example = "2001001")
@@ -33,6 +31,8 @@ public class NexisTeamResponse {
     private String leaderName;
     @Schema(description = "班组长手机号", example = "13800000002")
     private String leaderPhone;
+    @Schema(description = "班组长 Nexis 用户 ID", example = "103884809234948118")
+    private Long leaderUserId;
     @Schema(description = "状态 1启用 0停用", example = "1")
     private Integer status;
     @Schema(description = "状态名称", example = "启用")
@@ -42,8 +42,6 @@ public class NexisTeamResponse {
     public void setId(Long id) { this.id = id; }
     public Long getTenantId() { return tenantId; }
     public void setTenantId(Long tenantId) { this.tenantId = tenantId; }
-    public Long getProjectId() { return projectId; }
-    public void setProjectId(Long projectId) { this.projectId = projectId; }
     public String getProjectName() { return projectName; }
     public void setProjectName(String projectName) { this.projectName = projectName; }
     public Long getSiteId() { return siteId; }
@@ -66,6 +64,8 @@ public class NexisTeamResponse {
     public void setLeaderName(String leaderName) { this.leaderName = leaderName; }
     public String getLeaderPhone() { return leaderPhone; }
     public void setLeaderPhone(String leaderPhone) { this.leaderPhone = leaderPhone; }
+    public Long getLeaderUserId() { return leaderUserId; }
+    public void setLeaderUserId(Long leaderUserId) { this.leaderUserId = leaderUserId; }
     public Integer getStatus() { return status; }
     public void setStatus(Integer status) { this.status = status; }
     public String getStatusLabel() { return statusLabel; }

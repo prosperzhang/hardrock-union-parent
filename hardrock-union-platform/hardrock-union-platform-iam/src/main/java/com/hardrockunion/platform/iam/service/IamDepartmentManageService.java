@@ -1,6 +1,7 @@
 package com.hardrockunion.platform.iam.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,6 +32,7 @@ public class IamDepartmentManageService {
     private static final String WSGM_APP_CODE = "WSGM";
     private static final String WSGM_ROOT_DEPT_CODE = "WSGM_ROOT";
     private static final String WSGM_SUPER_ADMIN_ROLE_CODE = "WSGM_SUPER_ADMIN";
+    private static final Set<String> WORKSPACE_SCOPES = Set.of("ALL", "GROUP", "COMPANY", "ORGANIZATION", "PROJECT");
 
     private final IamDepartmentMapper iamDepartmentMapper;
     private final IamDepartmentRoleOptionMapper iamDepartmentRoleOptionMapper;
@@ -93,6 +95,7 @@ public class IamDepartmentManageService {
         department.setDeptShortName(StringUtils.trimToNull(request.getDeptShortName()));
         department.setParentId(request.getParentId() == null ? 0L : request.getParentId());
         department.setDeptType(StringUtils.defaultIfBlank(request.getDeptType(), "GENERAL"));
+        department.setWorkspaceScope(normalizeWorkspaceScope(request.getWorkspaceScope(), "ALL"));
         department.setStatus(normalizeFlag(request.getStatus(), 1, "status"));
         department.setSortNo(request.getSortNo() == null ? 0 : request.getSortNo());
         department.setDeleted(0);
@@ -117,6 +120,7 @@ public class IamDepartmentManageService {
         department.setDeptShortName(StringUtils.trimToNull(request.getDeptShortName()));
         department.setParentId(request.getParentId() == null ? 0L : request.getParentId());
         department.setDeptType(StringUtils.defaultIfBlank(request.getDeptType(), department.getDeptType()));
+        department.setWorkspaceScope(normalizeWorkspaceScope(request.getWorkspaceScope(), department.getWorkspaceScope()));
         department.setStatus(normalizeFlag(request.getStatus(), department.getStatus(), "status"));
         department.setSortNo(request.getSortNo() == null ? department.getSortNo() : request.getSortNo());
         iamDepartmentMapper.updateById(department);
@@ -258,6 +262,7 @@ public class IamDepartmentManageService {
         }
         ensureSelfOrAdmin(appCode, userId, loginUser);
         IamDepartment department = iamDepartmentQueryService.getDepartmentEntity(resolveAppId(appCode), departmentId);
+        iamDepartmentQueryService.ensureDepartmentAssignableToTenant(appCode, tenantId, department);
         IamUser user = iamUserMapper.selectById(userId);
         if (user == null || Integer.valueOf(1).equals(user.getDeleted())) {
             throw new BusinessException("用户不存在");
@@ -270,6 +275,14 @@ public class IamDepartmentManageService {
         iamTenantDepartmentRoleService.setPrimaryDepartment(department.getAppCode(), tenantId, user.getId(), department.getId(), allowCreateRelation);
 
         return iamDepartmentQueryService.getDepartmentDetail(appCode, department.getId(), loginUser);
+    }
+
+    private String normalizeWorkspaceScope(String value, String defaultValue) {
+        String scope = StringUtils.upperCase(StringUtils.defaultIfBlank(value, defaultValue));
+        if (!WORKSPACE_SCOPES.contains(scope)) {
+            throw new BusinessException("workspaceScope 仅支持 ALL、GROUP、COMPANY、ORGANIZATION、PROJECT");
+        }
+        return scope;
     }
 
     private void ensureSelfOrAdmin(String appCode, Long userId, LoginUser loginUser) {

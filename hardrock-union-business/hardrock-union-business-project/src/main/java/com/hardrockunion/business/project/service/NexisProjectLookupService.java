@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.hardrockunion.business.project.domain.entity.NexisProject;
+import com.hardrockunion.framework.core.exception.BusinessException;
 import com.hardrockunion.platform.tenant.dto.TenantSummaryResponse;
 import com.hardrockunion.platform.tenant.service.TenantWorkspaceFlowService;
 
@@ -12,6 +13,7 @@ import com.hardrockunion.platform.tenant.service.TenantWorkspaceFlowService;
 public class NexisProjectLookupService {
 
     private static final String APP_CODE = "NEXIS";
+    private static final String PROJECT_TENANT_TYPE = "PROJECT";
 
     private final TenantWorkspaceFlowService tenantWorkspaceFlowService;
 
@@ -32,6 +34,9 @@ public class NexisProjectLookupService {
     }
 
     private NexisProject toProject(TenantSummaryResponse project) {
+        if (project == null || !PROJECT_TENANT_TYPE.equalsIgnoreCase(project.getTenantType())) {
+            throw new BusinessException("项目不存在或当前空间不是项目");
+        }
         NexisProject entity = new NexisProject();
         entity.setId(project.getTenantId());
         entity.setTenantId(project.getTenantId());

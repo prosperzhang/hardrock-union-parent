@@ -26,6 +26,7 @@ import com.hardrockunion.platform.iam.mapper.IamPermissionMapper;
 public class IamPermissionQueryService {
 
     private static final String MENU = "MENU";
+    private static final String NEXIS = "NEXIS";
 
     private final IamPermissionMapper iamPermissionMapper;
     private final IamDepartmentRolePermissionMapper iamDepartmentRolePermissionMapper;
@@ -84,7 +85,7 @@ public class IamPermissionQueryService {
             return List.of();
         }
         List<IamRole> roles = iamRoleQueryService.listRoleEntitiesByUser(userId, appId, tenantId);
-        if (roles.stream().anyMatch(iamRoleQueryService::isAdminRole)) {
+        if (hasApplicationWideAdminAccess(appId, roles)) {
             return listMenuTree(appId);
         }
         List<Long> permissionIds = listPermissionIdsByUserBindings(userId, appId, tenantId);
@@ -234,7 +235,7 @@ public class IamPermissionQueryService {
             return List.of();
         }
         List<IamRole> roles = iamRoleQueryService.listRoleEntitiesByUser(userId, appId, tenantId);
-        if (roles.stream().anyMatch(iamRoleQueryService::isAdminRole)) {
+        if (hasApplicationWideAdminAccess(appId, roles)) {
             return listEnabledPermissionCodes(appId);
         }
         List<Long> permissionIds = listPermissionIdsByUserBindings(userId, appId, tenantId);
@@ -242,6 +243,14 @@ public class IamPermissionQueryService {
             .map(IamPermission::getPermissionCode)
             .distinct()
             .toList();
+    }
+
+    private boolean hasApplicationWideAdminAccess(Long appId, List<IamRole> roles) {
+        if (roles.stream().noneMatch(iamRoleQueryService::isAdminRole)) {
+            return false;
+        }
+        AppRegistry app = appRegistryQueryService.getAppById(appId);
+        return !StringUtils.equalsIgnoreCase(NEXIS, app.getAppCode());
     }
 
     public void ensureWsgmPermissionAdmin(LoginUser loginUser) {

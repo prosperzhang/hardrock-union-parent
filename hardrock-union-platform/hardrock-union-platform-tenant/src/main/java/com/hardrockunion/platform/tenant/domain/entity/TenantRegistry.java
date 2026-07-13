@@ -40,6 +40,12 @@ public class TenantRegistry extends BaseEntity {
 
     private String managerPhone;
 
+    private String externalOwnerName;
+
+    private String externalProjectName;
+
+    private String contractScopeName;
+
     public Long getAppId() {
         return appId;
     }
@@ -174,5 +180,29 @@ public class TenantRegistry extends BaseEntity {
 
     public void setManagerPhone(String managerPhone) {
         this.managerPhone = managerPhone;
+    }
+
+    public String getExternalOwnerName() {
+        return externalOwnerName;
+    }
+
+    public void setExternalOwnerName(String externalOwnerName) {
+        this.externalOwnerName = externalOwnerName;
+    }
+
+    public String getExternalProjectName() {
+        return externalProjectName;
+    }
+
+    public void setExternalProjectName(String externalProjectName) {
+        this.externalProjectName = externalProjectName;
+    }
+
+    public String getContractScopeName() {
+        return contractScopeName;
+    }
+
+    public void setContractScopeName(String contractScopeName) {
+        this.contractScopeName = contractScopeName;
     }
 }

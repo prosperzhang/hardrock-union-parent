@@ -8,14 +8,22 @@ import org.springframework.stereotype.Component;
 import com.hardrockunion.framework.core.exception.BusinessException;
 import com.hardrockunion.framework.security.model.LoginUser;
 import com.hardrockunion.platform.iam.service.IamPermissionQueryService;
+import com.hardrockunion.platform.iam.service.IamRoleQueryService;
+import com.hardrockunion.platform.tenant.service.TenantRegistryService;
 
 @Component
 public class NexisAccessGuard {
 
     private final IamPermissionQueryService iamPermissionQueryService;
+    private final IamRoleQueryService iamRoleQueryService;
+    private final TenantRegistryService tenantRegistryService;
 
-    public NexisAccessGuard(IamPermissionQueryService iamPermissionQueryService) {
+    public NexisAccessGuard(IamPermissionQueryService iamPermissionQueryService,
+                            IamRoleQueryService iamRoleQueryService,
+                            TenantRegistryService tenantRegistryService) {
         this.iamPermissionQueryService = iamPermissionQueryService;
+        this.iamRoleQueryService = iamRoleQueryService;
+        this.tenantRegistryService = tenantRegistryService;
     }
 
     public void ensureLogin(LoginUser loginUser) {
@@ -25,6 +33,10 @@ public class NexisAccessGuard {
         String normalizedAppCode = StringUtils.trimToEmpty(loginUser.getAppCode()).toUpperCase();
         if (!StringUtils.equals(normalizedAppCode, "NEXIS")) {
             throw new BusinessException("当前登录态不属于 NEXIS");
+        }
+        String tenantType = tenantRegistryService.getByAppAndId("NEXIS", loginUser.getTenantId()).getTenantType();
+        if (!StringUtils.equalsIgnoreCase("PROJECT", tenantType)) {
+            throw new BusinessException("当前空间不是项目，请先进入项目空间");
         }
     }
 
@@ -52,5 +64,13 @@ public class NexisAccessGuard {
             return;
         }
         throw new BusinessException("当前账号没有权限：" + normalizedPermissionCode);
+    }
+
+    public boolean hasRole(LoginUser loginUser, String roleCode) {
+        ensureLogin(loginUser);
+        return iamRoleQueryService.listRoleEntitiesByUser(
+                loginUser.getUserId(), loginUser.getAppCode(), loginUser.getTenantId())
+            .stream()
+            .anyMatch(role -> StringUtils.equalsIgnoreCase(role.getRoleCode(), roleCode));
     }
 }

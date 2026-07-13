@@ -285,7 +285,7 @@ biz_id
 
 商业定价方向详见：[Nexis Pricing Strategy](./nexis-pricing-strategy.md)。
 
-公司/集团与项目层级方向详见：[Nexis Company And Project Model](./nexis-company-project-model.md)。
+公司与项目层级方向详见：[Nexis 公司与项目模型](./nexis-company-project-model.md)。
 
 典型领域：
 

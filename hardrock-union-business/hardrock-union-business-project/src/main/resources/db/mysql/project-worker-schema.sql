@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS project_worker (
     id BIGINT PRIMARY KEY COMMENT '主键',
     tenant_id BIGINT NOT NULL COMMENT '所属租户ID',
     project_id BIGINT NOT NULL COMMENT '项目ID',
-    site_id BIGINT NOT NULL COMMENT '标段/工地ID',
+    site_id BIGINT DEFAULT NULL COMMENT '标段/工地ID，可为空',
     participant_company_id BIGINT NOT NULL COMMENT '参建单位ID',
     work_scope_id BIGINT DEFAULT NULL COMMENT '施工范围ID',
     team_id BIGINT DEFAULT NULL COMMENT '班组ID',

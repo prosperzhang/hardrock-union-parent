@@ -1,233 +1,549 @@
-# Nexis Company And Project Model
+# Nexis 组织、项目与施工协作模型
 
-## 1. Problem
+## 1. 文档目的
 
-The previous Nexis runtime model uses:
+本文定义 Nexis 的组织层级、项目归属、成员角色、数据隔离和集团开通边界，是后端、前端和数据库实现的统一依据。
 
-```text
-tenant = project
-```
+核心结论：
 
-This is still correct for project-level data isolation, but it is not enough for two real business scenarios:
+- 项目是施工业务和业务数据隔离的核心空间；
+- 公司负责跨项目经营管理；
+- 集团是正式组织类型，但不向普通用户开放自助创建；
+- 集团基础组织能力必须保留，高级经营能力按企业合同授权；
+- 用户只注册一次，可以同时参与多个集团、公司和项目；
+- 参建单位、班组和工人属于项目施工结构，不应被建成平台租户。
 
-1. A construction company may have 40 projects running at the same time. Someone at company level must coordinate progress, cost, procurement, risks, documents, and project managers.
-2. A user may participate in multiple projects as an investor, partner, owner representative, or company executive. The user should not need multiple accounts.
+## 2. 完整业务结构
 
-Nexis therefore needs a company/group layer above project tenants.
-
-## 2. Final Direction
-
-Nexis should use a two-level business model:
+### 2.1 标准组织链路
 
 ```text
-Nexis company/group workspace
-  -> Nexis project tenant
+集团
+├── 公司
+│   ├── 项目
+│   └── 项目
+└── 直属项目
 ```
 
-Important rule:
+Nexis 同时允许：
 
-- project remains the project business isolation unit
-- company/group is the multi-project management unit
-- one user account can join many company/project tenants with different roles
+```text
+公司
+└── 项目
 
-In storage terms, this becomes:
+独立项目
+```
+
+因此，合法关系只有：
+
+```text
+GROUP   -> COMPANY
+GROUP   -> PROJECT
+COMPANY -> PROJECT
+null    -> GROUP
+null    -> COMPANY
+null    -> PROJECT
+```
+
+不允许：
+
+```text
+COMPANY -> COMPANY
+PROJECT -> PROJECT
+PROJECT -> COMPANY
+PROJECT -> GROUP
+```
+
+### 2.2 项目内部施工结构
+
+```text
+项目
+├── 参建单位
+│   ├── 班组
+│   │   └── 工人
+│   └── 班组
+└── 参建单位
+```
+
+参建单位可以是建设单位、总包单位、专业分包、劳务分包、监理单位、供应商等。参建单位可以绑定已经入驻 Nexis 的公司，也可以先作为外部单位存在。
+
+班组必须属于某个项目和参建单位。工人必须通过班组参与项目，考勤、进退场和实名信息继续以项目为隔离边界。
+
+施工日报、材料需求、到货验收等业务记录不应全部强制落到班组。它们首先属于项目，根据业务需要再关联参建单位、班组、施工部位或填报人。
+
+## 3. 组织空间与施工单元职责
+
+### 3.1 集团空间
+
+集团空间用于跨公司治理和经营统筹，基础能力包括：
+
+- 维护集团基本信息；
+- 管理集团成员、部门和角色；
+- 创建和查看下属公司；
+- 创建和查看集团直属项目；
+- 查看下属公司的项目；
+- 为集团用户配置下属组织的数据范围。
+
+集团高级能力包括战略、投资、跨公司成本、跨公司审批、审计、法务风控、经营驾驶舱和系统集成。这些能力按企业合同授权，不因为存在 `GROUP` 租户就默认全部开放。
+
+### 3.2 公司空间
+
+公司空间用于管理一家公司及其多个项目，主要负责：
+
+- 公司成员、部门和角色；
+- 多项目总览；
+- 项目经理和项目风险管理；
+- 材料需求与集中采购汇总；
+- 成本、合同、发票和付款汇总；
+- 供应商履约和项目经营分析。
+
+公司可以独立存在，也可以归属于一个集团。
+
+### 3.3 项目空间
+
+项目空间承载施工执行数据，包括：
+
+- 项目台账；
+- 项目成员和项目部门角色；
+- 参建单位；
+- 班组和工人；
+- 工人实名、进退场和考勤；
+- 施工日报；
+- 材料需求、采购申请和到货验收；
+- 现场照片和附件；
+- 变更签证、成本、发票和项目资料。
+
+项目可以属于集团、属于公司，也可以作为独立项目运行。
+
+### 3.4 班组施工单元
+
+班组不是租户，也不是独立工作空间。班组是项目内、参建单位下的施工执行单元，主要负责：
+
+- 维护班组基本信息和班组长；
+- 管理班组工人；
+- 办理工人进退场；
+- 记录班组考勤；
+- 关联施工部位和施工范围；
+- 承接项目下发的施工任务；
+- 填报或协助填报与本班组有关的施工记录。
+
+班组不能脱离项目存在，也不能跨项目共享同一条班组记录。同一个现实班组参与多个项目时，应分别建立项目内班组记录。
+
+## 4. 租户与主数据模型
+
+### 4.1 空间主表
+
+集团、公司和项目统一存放在：
 
 ```text
 tenant_registry
-  tenant_type = GROUP / COMPANY / PROJECT
-  parent_tenant_id = parent company or group tenant id
 ```
 
-Typical hierarchy:
+关键字段：
 
 ```text
-GROUP
-  -> COMPANY
-       -> PROJECT
-       -> PROJECT
-       -> PROJECT
+tenant_type       = GROUP / COMPANY / PROJECT
+parent_tenant_id  = 父级集团或公司 ID
 ```
 
-A simple customer can skip `GROUP` and use:
+约束：
+
+- `GROUP.parent_tenant_id` 必须为空；
+- `COMPANY.parent_tenant_id` 只能为空或指向 `GROUP`；
+- `PROJECT.parent_tenant_id` 只能为空、指向 `GROUP` 或指向 `COMPANY`；
+- 不再创建 `nexis_project` 作为第二套项目主表；
+- 项目的唯一身份来源是 `tenant_registry.id`；
+- 项目业务表统一使用 `tenant_id` 保存项目 ID。
+
+### 4.2 项目施工主数据
 
 ```text
-COMPANY
-  -> PROJECT
+project_participant_company  项目参建单位
+project_team                 项目班组
+project_worker               项目工人
+project_worker_entry         工人进退场
+project_worker_attendance    工人考勤
 ```
 
-A very small trial customer can still use a standalone project:
+这里的 `tenant_id` 必须等于项目租户 ID。`participant_company_id`、`team_id` 和 `worker_id` 只表达项目内部关系，不能替代 `tenant_id`。
 
-```text
-PROJECT
-```
+### 4.3 外部上级项目
 
-Standalone projects remain allowed for compatibility and for trial onboarding.
+当劳务公司承接了尚未使用 Nexis 的 A 公司项目时，劳务公司可以：
 
-## 3. Company-Level Coordination
+1. 创建自己的公司空间；
+2. 创建一个本地项目空间；
+3. 在项目中记录外部上级单位、外部上级项目和自己的承包范围；
+4. 创建参建单位、班组和工人并开展施工业务。
 
-When a company has many projects, coordination should happen from a company workspace, not by forcing company executives to enter each project as normal project members.
+此时 A 公司和 A 公司项目只是外部业务信息，不创建虚假的集团或公司租户。
 
-Recommended company-level departments:
+当 A 公司以后入驻 Nexis 时，通过 `project_external_link` 发起并审核项目关联，将劳务公司的本地承包项目与 A 公司的正式项目建立关系。双方原有施工数据不搬迁、不合表，只增加可审核的跨组织关联。
 
-- executive office
-- project management center
-- engineering management department
-- cost department
-- procurement department
-- finance department
-- document/archive department
+## 5. 用户、部门与角色
 
-Recommended company-level roles:
+### 5.1 一个用户参与多个空间
 
-- `NEXIS_COMPANY_OWNER`
-- `NEXIS_COMPANY_ADMIN`
-- `NEXIS_PROJECT_DIRECTOR`
-- `NEXIS_ENGINEERING_DIRECTOR`
-- `NEXIS_COST_DIRECTOR`
-- `NEXIS_PROCUREMENT_DIRECTOR`
-- `NEXIS_FINANCE_DIRECTOR`
-- `NEXIS_DOCUMENT_MANAGER`
-
-Company-level dashboards should aggregate:
-
-- project progress
-- project risk
-- material requests
-- arrival exceptions
-- cost overruns
-- missing invoices
-- missing delivery notes
-- supplier fulfillment ranking
-- project manager performance
-- multi-project procurement analysis
-
-## 4. Multi-Project User Participation
-
-One person must keep one account:
+用户账号统一存放在：
 
 ```text
 iam_user
 ```
 
-The user's participation in companies and projects is represented by tenant membership:
+用户与空间的成员关系存放在：
 
 ```text
 iam_tenant_member
+```
+
+用户在具体空间中的部门和角色存放在：
+
+```text
 iam_tenant_member_department_role
 ```
 
-Example:
+一个用户可以同时是：
 
 ```text
-user A
-  -> Company Alpha: NEXIS_COMPANY_OWNER
-  -> Project 1: NEXIS_INVESTOR
-  -> Project 2: NEXIS_INVESTOR
-  -> Project 8: NEXIS_OWNER_REPRESENTATIVE
+集团甲：集团负责人
+公司乙：公司负责人
+项目 A：投资人
+项目 B：项目负责人
+项目 C：甲方代表
 ```
 
-Investor roles should not be mixed with construction execution roles.
+登录后切换当前空间，权限跟随当前空间和当前角色变化，不需要重复注册账号。
 
-Recommended investor-side roles:
+### 5.2 集团部门与角色
 
-- `NEXIS_INVESTOR`
-- `NEXIS_INVESTOR_REPRESENTATIVE`
-- `NEXIS_PARTNER`
-- `NEXIS_OWNER_REPRESENTATIVE`
+集团基础部门为：
 
-Investor-visible information should focus on:
+1. 集团管理层；
+2. 战略管理部；
+3. 投资发展部；
+4. 审计部；
+5. 法务风控部。
 
-- project progress
-- investment amount
-- project cost report
-- payment and collection summary
-- contract and change summary
-- risk reminders
-- owner dashboard
+集团基础角色为：
 
-Investor roles should not automatically see every internal execution detail, such as worker attendance, internal approval notes, or subcontractor management data.
+1. 集团负责人；
+2. 董事/股东；
+3. 战略负责人；
+4. 战略经理；
+5. 投资负责人；
+6. 投资经理；
+7. 集团审计负责人；
+8. 集团审计专员；
+9. 法务风控负责人；
+10. 集团法务；
+11. 集团风控经理。
 
-## 5. Data Scope
+集团专属权限码为：
 
-Nexis should introduce data scope above basic role permission:
+```text
+NEXIS_STRATEGY_MANAGE
+NEXIS_INVESTMENT_MANAGE
+```
+
+组织管理、多项目管理、财务、采购、审计和法务风控等能力属于可复用权限，由集团角色按职责组合，不需要再创建同义权限。
+
+### 5.3 公司部门与角色
+
+公司空间共有 9 类基础部门、20 个基础角色：
+
+| 公司部门 | 角色 |
+| --- | --- |
+| 公司管理层 | 公司负责人、公司副总经理 |
+| 法务部 | 公司法务负责人、公司法务专员 |
+| 审计部 | 公司审计负责人、公司审计专员 |
+| 运营管理中心 | 运营负责人、多项目负责人 |
+| 工程管理中心 | 工程管理负责人、项目督导 |
+| 商务成本中心 | 商务成本负责人、公司成本管理员 |
+| 财务部 | 财务负责人、会计、出纳 |
+| 人力行政部 | 人力行政负责人、人事、行政专员 |
+| 采购供应部 | 采购负责人、采购员 |
+
+公司负责人使用：
+
+```text
+NEXIS_COMPANY_ADMIN
+```
+
+公司创建人自动成为公司负责人。公司负责人可以管理公司成员、在公司下创建项目并管理本公司项目，但不能管理其他公司、其他集团或无关独立项目。
+
+公司权限域包括：
+
+```text
+NEXIS_ORGANIZATION_MANAGE
+NEXIS_MULTI_PROJECT_MANAGE
+NEXIS_PROJECT_MEMBER_MANAGE
+NEXIS_BUSINESS_COST_MANAGE
+NEXIS_FINANCE_MANAGE
+NEXIS_HR_ADMIN_MANAGE
+NEXIS_PROCUREMENT_MANAGE
+NEXIS_AUDIT_MANAGE
+NEXIS_LEGAL_RISK_MANAGE
+```
+
+各部门角色只组合职责所需权限。例如财务角色不能因为属于公司空间就自动获得项目成员管理权限，项目督导也不能自动获得公司财务权限。
+
+### 5.4 项目部门与角色
+
+项目空间共有 9 个基础部门、39 个基础角色：
+
+| 项目部门 | 角色 |
+| --- | --- |
+| 项目管理部 | 项目负责人、项目经理、生产经理、技术负责人 |
+| 工程部 | 施工员、工长、土建工程师、安装工程师、装饰工程师、机电工程师 |
+| 劳务管理部 | 劳务负责人、班组长 |
+| 技术质量部 | 技术员、质量员、测量员、试验员、BIM 工程师 |
+| 安全环保部 | 安全主管、安全员、环保员、文明施工管理员 |
+| 商务合约部 | 商务经理、预算员、造价员、合约专员、成本管理员 |
+| 物资设备部 | 材料员、项目采购员、机械员、设备管理员、仓库管理员 |
+| 综合管理部 | 办公室主任、项目行政专员、项目人事、劳资员、后勤管理员、文员 |
+| 资料部 | 资料员、档案管理员 |
+
+项目负责人使用：
+
+```text
+NEXIS_PROJECT_ADMIN
+```
+
+项目创建人自动成为项目负责人。项目负责人管理当前项目的成员、参建单位、班组和业务数据，但不能管理其他项目。
+
+项目经理使用 `NEXIS_PROJECT_MANAGER`，负责项目日常执行管理。项目经理拥有项目业务管理权限，但默认不能管理项目成员，也不能替代项目负责人变更项目空间的最高管理关系。
+
+项目基础权限域包括：
+
+```text
+NEXIS_PROJECT_MANAGE
+NEXIS_PROJECT_MEMBER_MANAGE
+NEXIS_PARTICIPANT_MANAGE
+NEXIS_TEAM_MANAGE
+NEXIS_WORKER_MANAGE
+NEXIS_ONBOARDING_MANAGE
+NEXIS_ATTENDANCE_MANAGE
+NEXIS_MATERIAL_MANAGE
+```
+
+当前核心权限组合：
+
+- 项目负责人：项目基础管理、项目成员、参建单位、班组、工人、进退场、考勤和材料业务；
+- 项目经理：项目基础管理、参建单位、班组、工人、进退场、考勤和材料业务，不包含项目成员管理；
+- 施工员：班组、工人、进退场和考勤；
+- 劳务负责人：班组、工人、进退场和考勤；
+- 班组长：本人班组内的工人、进退场和考勤；
+- 材料员：材料业务。
+
+其他项目角色已经进入角色目录，后续按施工日报、质量、安全、商务、设备、资料等业务模块继续绑定细分权限。
+
+### 5.5 班组成员与角色
+
+班组没有单独的 IAM 部门和角色体系。它复用项目成员体系，通过下面两个条件确定班组长：
+
+```text
+项目角色：NEXIS_TEAM_LEADER
+班组字段：project_team.leader_user_id
+```
+
+班组长必须同时满足：
+
+1. 已注册 Nexis 账号；
+2. 是当前项目的有效成员；
+3. 在项目“劳务管理部”拥有“班组长”角色；
+4. 被填写到对应班组的 `leader_user_id`。
+
+班组长默认只能访问自己负责的班组。仅有“班组长”角色但没有被指定为某个班组负责人时，不应看到其他班组数据。
+
+班组核心关系为：
+
+```text
+project_team.tenant_id              = 当前项目 ID
+project_team.participant_company_id = 所属参建单位 ID
+project_team.site_id                = 所属标段/工地，可为空
+project_team.work_scope_id          = 施工范围，可为空
+project_team.leader_user_id         = 班组长用户 ID，可为空
+```
+
+班组相关人员的职责边界：
+
+| 人员 | 所属层级 | 职责边界 |
+| --- | --- | --- |
+| 项目负责人 | 项目管理部 | 管理全项目及全部班组 |
+| 项目经理 | 项目管理部 | 负责项目日常执行，管理全部参建单位和班组业务 |
+| 施工员 | 工程部 | 管理授权范围内的现场施工、班组和工人 |
+| 劳务负责人 | 劳务管理部 | 管理项目劳务、班组、工人、进退场和考勤 |
+| 班组长 | 劳务管理部 | 管理本人负责班组的工人、进退场和考勤 |
+| 劳资员 | 综合管理部 | 负责实名、工资和劳资资料；具体权限随劳务模块落地 |
+| 工人 | 项目业务对象 | 默认不是后台管理角色，也不要求必须拥有 Nexis 账号 |
+
+班组名称在同一项目、同一参建单位内不能重复。班组所选施工范围必须属于当前项目、当前参建单位和对应工地，不能用其他项目的数据 ID 建立关联。
+
+## 6. 权限继承与数据隔离
+
+### 6.1 管理权限边界
+
+```text
+WSGM 超级管理员
+└── 可为客户开通集团，不参与客户日常业务
+
+集团负责人
+└── 只能管理本集团、下属公司和下属项目
+
+公司负责人
+└── 只能管理本公司和本公司项目
+
+项目负责人
+└── 只能管理当前项目
+```
+
+任何负责人都不能因为角色的 `admin_role = true` 获得全平台权限。集团负责人不能管理其他集团，公司负责人不能管理其他公司或独立项目。
+
+### 6.2 数据范围
+
+角色解决“能做什么”，数据范围解决“能看哪些数据”。建议使用以下数据范围：
 
 ```text
 PROJECT_SELF
 COMPANY_SELECTED_PROJECTS
 COMPANY_ALL_PROJECTS
-GROUP_ALL_PROJECTS
+GROUP_SELECTED_COMPANIES
+GROUP_ALL_COMPANIES_PROJECTS
 ```
 
-Meaning:
+含义：
 
-- `PROJECT_SELF`: user can access only the current project tenant
-- `COMPANY_SELECTED_PROJECTS`: user can access selected projects under a company
-- `COMPANY_ALL_PROJECTS`: user can access all projects under a company
-- `GROUP_ALL_PROJECTS`: user can access all projects under all companies in a group
+- `PROJECT_SELF`：仅当前项目；
+- `COMPANY_SELECTED_PROJECTS`：公司下指定项目；
+- `COMPANY_ALL_PROJECTS`：公司下全部项目；
+- `GROUP_SELECTED_COMPANIES`：集团下指定公司及其项目；
+- `GROUP_ALL_COMPANIES_PROJECTS`：集团下全部公司和项目。
 
-The current implementation starts with parent tenant hierarchy in `tenant_registry`. Full data-scope enforcement should be added as a separate capability layer instead of hard-coding company permissions inside project services.
+数据范围必须通过统一鉴权能力实现，不能散落在施工日报、材料、考勤等业务服务中分别硬编码。
 
-## 6. Runtime Flow
+## 7. 创建与开通流程
 
-### Company Creation
+### 7.1 新用户自助流程
 
 ```text
-POST /api/nexis/tenants/workspaces
+注册账号
+-> 完善个人信息
+-> 选择创建公司或创建独立项目
+-> 进入工作空间
+```
+
+注册引导和普通工作台不展示“创建集团”。
+
+### 7.2 创建独立公司
+
+```text
 tenantType = COMPANY
-```
-
-Creates:
-
-- company tenant in `tenant_registry`
-- creator membership in `iam_tenant_member`
-- creator default department-role binding
-
-### Project Creation Under Company
-
-```text
-POST /api/nexis/tenants/workspaces
-tenantType = PROJECT
-parentTenantId = company tenant id
-```
-
-Creates:
-
-- project tenant in `tenant_registry`
-- `parent_tenant_id = company tenant id`
-- creator membership in the project
-- creator default department-role binding
-
-### Standalone Project Creation
-
-```text
-POST /api/nexis/tenants/workspaces
-tenantType = PROJECT
 parentTenantId = null
 ```
 
-Still allowed for:
+创建人自动成为公司成员，并获得公司管理层的 `NEXIS_COMPANY_ADMIN` 角色。
 
-- trial users
-- very small project teams
-- compatibility with the previous Nexis model
-
-## 7. Implementation Rule
-
-Do not reintroduce `nexis_project` as the project master table.
-
-The source of truth remains:
+### 7.3 在集团下创建公司
 
 ```text
-tenant_registry
+tenantType = COMPANY
+parentTenantId = 集团 ID
 ```
 
-Nexis project business tables continue to use the current `tenant_id` as the project identity.
+操作人必须具备该集团的管理权限。创建人同时成为新公司的公司负责人。
 
-Company/group hierarchy is expressed by:
+### 7.4 创建项目
 
 ```text
-tenant_registry.parent_tenant_id
-tenant_registry.tenant_type
+tenantType = PROJECT
+parentTenantId = null / 集团 ID / 公司 ID
 ```
 
-This keeps the architecture aligned with the existing app-aware tenant model while making company-level Nexis possible.
+创建人自动成为项目成员，并获得项目管理部的 `NEXIS_PROJECT_ADMIN` 角色。
+
+独立项目后续可以归入有管理权限的集团或公司，也可以重新转为独立项目。
+
+### 7.5 平台开通集团
+
+集团由平台运营审核企业资料、合同和购买范围后开通：
+
+```text
+WSGM 超级管理员
+-> 创建 GROUP 空间
+-> 指定集团负责人
+-> 配置基础部门和角色
+-> 按合同开通功能包和数据范围
+```
+
+普通 NEXIS 用户提交 `tenantType = GROUP` 时必须被拒绝，并提示联系平台开通。
+
+### 7.6 创建参建单位、班组和工人
+
+项目内部创建顺序为：
+
+```text
+项目
+-> 创建或绑定参建单位
+-> 创建施工范围，可选
+-> 创建班组
+-> 指定班组长
+-> 录入工人
+-> 办理进场
+-> 开始考勤和施工记录
+```
+
+创建班组时必须提交当前项目中的 `participantCompanyId`，可以选填 `siteId` 和 `workScopeId`。如果指定 `leaderUserId`，该用户必须已经是当前项目成员并拥有 `NEXIS_TEAM_LEADER` 角色。
+
+创建工人时，工人的项目、参建单位和班组必须保持一致。工人转入其他班组时应记录业务变更，不能通过修改 `tenant_id` 把工人移动到另一个项目。
+
+## 8. 集团基础能力与合同能力
+
+### 8.1 创建集团后默认具备
+
+- 集团租户和组织层级；
+- 集团基本信息；
+- 集团成员、部门和角色；
+- 下属公司和直属项目；
+- 基础组织查询和管理权限继承；
+- 基础数据隔离。
+
+### 8.2 按合同授权
+
+- 集团经营驾驶舱；
+- 多公司成本和利润汇总；
+- 跨公司材料采购分析；
+- 集团级审批流；
+- 战略和投资管理；
+- 审计与法务风控工作台；
+- 自定义表单、成本科目和报表；
+- ERP、财务、BIM、企业微信、钉钉和飞书集成；
+- API、私有化部署和专属实施服务。
+
+集团是不是数据模型，与集团购买了哪些功能是两个问题：`GROUP` 必须长期保留，功能是否可用由合同、版本和权限授权共同决定。
+
+## 9. 前端呈现规则
+
+- 注册引导只显示“创建公司”和“创建独立项目”；
+- 普通工作台顶部不显示“创建集团”；
+- 已开通集团的用户可以看到集团空间和“集团”类型标识；
+- 集团空间提供“创建公司”和“创建项目”；
+- 公司空间提供“创建项目”；
+- 项目空间进入施工业务工作台；
+- 参建单位、班组和工人作为项目工作台内的业务页面，不进入全局空间切换器；
+- 班组长进入项目后默认看到“我的班组”，不需要再切换一次班组租户；
+- 项目负责人和劳务负责人可以在项目内按参建单位、工地、施工范围和班组筛选数据；
+- 空间切换必须一次点击完成，并同步更新当前登录租户；
+- 用户只能看到直接参与或按上级组织权限可见的空间。
+
+## 10. 实现原则
+
+后续开发必须遵守以下原则：
+
+1. 不再建立第二套集团、公司或项目主表；
+2. 不把参建单位和班组建成租户；
+3. 不把集团高级功能是否付费写死在 `tenant_type` 判断中；
+4. 不把 `admin_role` 解释为全平台管理员；
+5. 不允许集团或公司负责人越权访问无关组织；
+6. 不因外部上级单位尚未入驻而创建虚假租户；
+7. 不迁移或合并双方项目原始数据，只建立经过审核的外部项目关联；
+8. 所有集团定制功能应建立在稳定的集团、公司、项目基础模型之上。

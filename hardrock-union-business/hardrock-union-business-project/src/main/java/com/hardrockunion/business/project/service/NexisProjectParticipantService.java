@@ -50,9 +50,6 @@ public class NexisProjectParticipantService {
             .eq(NexisProjectParticipant::getTenantId, loginUser.getTenantId())
             .eq(NexisProjectParticipant::getDeleted, 0)
             .orderByDesc(NexisProjectParticipant::getId);
-        if (query.getProjectId() != null) {
-            wrapper.eq(NexisProjectParticipant::getProjectId, query.getProjectId());
-        }
         if (query.getParticipantCompanyId() != null) {
             wrapper.eq(NexisProjectParticipant::getParticipantCompanyId, query.getParticipantCompanyId());
         }
@@ -60,24 +57,11 @@ public class NexisProjectParticipantService {
             wrapper.eq(NexisProjectParticipant::getParticipantRole, StringUtils.upperCase(StringUtils.trim(query.getParticipantRole())));
         }
         if (StringUtils.isNotBlank(query.getKeyword())) {
-            List<Long> projectIds = projectLookupService.findIdsByKeyword(query.getKeyword(), loginUser.getTenantId());
             List<Long> companyIds = participantCompanyService.findIdsByKeyword(query.getKeyword(), loginUser.getTenantId());
-            if (projectIds.isEmpty() && companyIds.isEmpty()) {
+            if (companyIds.isEmpty()) {
                 return PageResponse.from(Page.<NexisProjectParticipantResponse>of(query.getPageNum(), query.getPageSize()));
             }
-            wrapper.and(w -> {
-                boolean hasCondition = false;
-                if (!projectIds.isEmpty()) {
-                    w.in(NexisProjectParticipant::getProjectId, projectIds);
-                    hasCondition = true;
-                }
-                if (!companyIds.isEmpty()) {
-                    if (hasCondition) {
-                        w.or();
-                    }
-                    w.in(NexisProjectParticipant::getParticipantCompanyId, companyIds);
-                }
-            });
+            wrapper.in(NexisProjectParticipant::getParticipantCompanyId, companyIds);
         }
         Page<NexisProjectParticipant> page = projectParticipantMapper.selectPage(Page.of(query.getPageNum(), query.getPageSize()), wrapper);
         return PageResponse.from(page.convert(item -> toResponse(item, loginUser.getTenantId())));
@@ -89,9 +73,9 @@ public class NexisProjectParticipantService {
     }
 
     public NexisProjectParticipantResponse create(NexisProjectParticipantCreateRequest request, LoginUser loginUser) {
-        nexisAccessGuard.ensureLogin(loginUser);
-        if (request == null || request.getProjectId() == null) {
-            throw new BusinessException("projectId 不能为空");
+        nexisAccessGuard.ensurePermission(loginUser, NexisPermissionCodes.PARTICIPANT_MANAGE);
+        if (request == null) {
+            throw new BusinessException("请求不能为空");
         }
         if (request.getParticipantCompanyId() == null) {
             throw new BusinessException("participantCompanyId 不能为空");
@@ -104,12 +88,19 @@ public class NexisProjectParticipantService {
             throw new BusinessException("participantRole 不合法");
         }
 
-        projectLookupService.loadEntity(request.getProjectId(), loginUser.getTenantId());
+        projectLookupService.loadEntity(loginUser.getTenantId(), loginUser.getTenantId());
         participantCompanyService.loadEntity(request.getParticipantCompanyId(), loginUser.getTenantId());
+        Long duplicateCount = projectParticipantMapper.selectCount(new LambdaQueryWrapper<NexisProjectParticipant>()
+            .eq(NexisProjectParticipant::getTenantId, loginUser.getTenantId())
+            .eq(NexisProjectParticipant::getParticipantCompanyId, request.getParticipantCompanyId())
+            .eq(NexisProjectParticipant::getParticipantRole, participantRole.getCode())
+            .eq(NexisProjectParticipant::getDeleted, 0));
+        if (duplicateCount != null && duplicateCount > 0) {
+            throw new BusinessException("该单位已按此角色加入当前项目");
+        }
 
         NexisProjectParticipant participant = new NexisProjectParticipant();
         participant.setTenantId(loginUser.getTenantId());
-        participant.setProjectId(request.getProjectId());
         participant.setParticipantCompanyId(request.getParticipantCompanyId());
         participant.setParticipantRole(participantRole.getCode());
         participant.setIsLead(request.getIsLead() == null ? 0 : (request.getIsLead() == 1 ? 1 : 0));
@@ -133,13 +124,23 @@ public class NexisProjectParticipantService {
         return participant;
     }
 
+    public void ensureActiveParticipantCompany(Long participantCompanyId, Long tenantId) {
+        Long count = projectParticipantMapper.selectCount(new LambdaQueryWrapper<NexisProjectParticipant>()
+            .eq(NexisProjectParticipant::getTenantId, tenantId)
+            .eq(NexisProjectParticipant::getParticipantCompanyId, participantCompanyId)
+            .eq(NexisProjectParticipant::getStatus, 1)
+            .eq(NexisProjectParticipant::getDeleted, 0));
+        if (count == null || count == 0) {
+            throw new BusinessException("参建单位尚未加入当前项目");
+        }
+    }
+
     private NexisProjectParticipantResponse toResponse(NexisProjectParticipant item, Long tenantId) {
-        NexisProject project = projectLookupService.loadEntity(item.getProjectId(), tenantId);
+        NexisProject project = projectLookupService.loadEntity(item.getTenantId(), tenantId);
         NexisParticipantCompany company = participantCompanyService.loadEntity(item.getParticipantCompanyId(), tenantId);
         NexisProjectParticipantResponse response = new NexisProjectParticipantResponse();
         response.setId(item.getId());
         response.setTenantId(item.getTenantId());
-        response.setProjectId(item.getProjectId());
         response.setProjectName(project.getProjectName());
         response.setParticipantCompanyId(item.getParticipantCompanyId());
         response.setParticipantCompanyName(company.getCompanyName());

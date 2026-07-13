@@ -7,7 +7,6 @@ import com.hardrockunion.infrastructure.db.entity.BaseEntity;
 public class NexisTeam extends BaseEntity {
 
     private Long tenantId;
-    private Long projectId;
     private Long siteId;
     private Long participantCompanyId;
     private Long workScopeId;
@@ -15,13 +14,12 @@ public class NexisTeam extends BaseEntity {
     private String teamCode;
     private String leaderName;
     private String leaderPhone;
+    private Long leaderUserId;
     private Integer status;
     private Long createdBy;
 
     public Long getTenantId() { return tenantId; }
     public void setTenantId(Long tenantId) { this.tenantId = tenantId; }
-    public Long getProjectId() { return projectId; }
-    public void setProjectId(Long projectId) { this.projectId = projectId; }
     public Long getSiteId() { return siteId; }
     public void setSiteId(Long siteId) { this.siteId = siteId; }
     public Long getParticipantCompanyId() { return participantCompanyId; }
@@ -36,6 +34,8 @@ public class NexisTeam extends BaseEntity {
     public void setLeaderName(String leaderName) { this.leaderName = leaderName; }
     public String getLeaderPhone() { return leaderPhone; }
     public void setLeaderPhone(String leaderPhone) { this.leaderPhone = leaderPhone; }
+    public Long getLeaderUserId() { return leaderUserId; }
+    public void setLeaderUserId(Long leaderUserId) { this.leaderUserId = leaderUserId; }
     public Integer getStatus() { return status; }
     public void setStatus(Integer status) { this.status = status; }
     public Long getCreatedBy() { return createdBy; }
